@@ -194,17 +194,17 @@ if shuffle != 0:
     cmd = ' '.join(cmd)
     os.system(cmd)
 
-    # for x in range(0, shuffle):
-    #     shutil.rmtree(data2 + 'shuffle' + str(x + 1), ignore_errors=True)
-    #     os.remove(data2 + 'shuffle' + str(x + 1) + ".bed")
+    for x in range(0, shuffle):
+        shutil.rmtree(data2 + 'shuffle' + str(x + 1), ignore_errors=True)
+        os.remove(data2 + 'shuffle' + str(x + 1) + ".bed")
 
 my_file = Path("./" + data2 + "/" + data2 +"Genes")
 if my_file.is_file():
     os.remove("./" + data2 + "/" + data2 +"Genes")
 
-my_file = Path("./" + data2 + "/" + data2 +"PeaksinGenes")
+my_file = Path("./" + data2 + "/" + data2 +"PeaksInGenes")
 if my_file.is_file():
-    os.remove("./" + data2 + "/" + data2 +"PeaksinGenes")
+    os.remove("./" + data2 + "/" + data2 +"PeaksInGenes")
 
 my_file = Path("./" + data2 + "/" + data2 + "Intergenic.png")
 if my_file.is_file():
@@ -273,30 +273,6 @@ if my_file.is_file():
 my_file = Path("./" + data2 + "/NotExpressed_" + data2+ "Intergenic.pdf")
 if my_file.is_file():
     os.remove("./" + data2 + "/NotExpressed_" + data2+ "Intergenic.pdf")
-#
-# for name in files:
-#     my_file = Path(name)
-#     if my_file.is_file():
-#         os.remove(name)
-
-# os.remove("./" + data2 + "/infoGenes" + data2)
-# os.remove("./" + data2 + "/infoRepeatsExpressed_" + data2 + ".csv")
-# os.remove("./" + data2 + "/infoRepeatsNotExpressed_" + data2 + ".csv")
-# os.rename("./" + data2 + "/Intergen" + data2, "./" + data2 + "/" + data2 + "_intergenic.bed")
-# os.remove("./" + data2 + "/Expressed_" + data2)
-# os.remove("./" + data2 + "/Expressed_" + data2 + ".csv")
-# os.remove("./" + data2 + "/NotExpressed_" + data2)
-# os.remove("./" + data2 + "/NotExpressed_" + data2 + ".csv")
-# os.rename("./" + data2 + "/Expressed_" + data2 + "GenesTable", "./" + data2 + "/" + data2 + "_Expressed_Annotation.table")
-# os.rename("./" + data2 + "/NotExpressed_" + data2 + "GenesTable", "./" + data2 + "/" + data2 + "_NotExpressed_Annotation.table")
-# os.remove("./" + data2 + "/Expressed_" + data2 + "exon")
-# os.remove("./" + data2 + "/NotExpressed_" + data2 + "exon")
-# os.remove("./" + data2 + "/SameOverlapping" + data2)
-# os.remove("./" + data2 + "/Expressed_" + data2 + "tableFoldChange")
-# os.remove("./" + data2 + "/NotExpressed_" + data2 + "tableFoldChange")
-
-
-
 
 
 
