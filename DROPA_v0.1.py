@@ -4,7 +4,7 @@
 from pathlib import Path
 import argparse
 import os
-import ExpressGenes2_1_1 as ex
+import DROPAcore as ex
 import shutil
 
 ############ INPUT OF VARIABLES ###################
