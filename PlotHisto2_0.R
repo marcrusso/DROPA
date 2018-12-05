@@ -10,7 +10,9 @@ n_total = 0
 numberIntergenicshuffleFinal = 0
 names_columns = c("ChromoInter","BeginInter","EndInter","NameInter",'Name1','Name2')
 count = 1
+
 # READ THE FILES WHICH EACH TWO ARGUMENTS ARE THE NAME OF THE FOLDER AND THE NAME OF THE FILE IN THE FOLDER
+
 for (x in seq(3,n_of_inputs,2)) {
   files_names[count]=paste('./', myArgs[x],'/',myArgs[x+1],'.csv', sep="")
   fileintergenicShuffle[count]=paste('./', myArgs[x],'/',myArgs[x],'_intergenic.bed', sep="")
@@ -48,10 +50,6 @@ intergenicProporcion=numberIntergenicNormal/numberIntergenicshuffleFinal
  
 ###### GET THE AVERAGE NUMBER OF INTRAGENIC PEAKS IN SHUFFLE AND ORIGINAL ####
 
-
-# if(!file.exists(fileshuffle) & !file.exists(fileshuffle2) & !file.exists(fileshuffle3)){
- # print('No intragenic peaks in shuffles')
-#} else {
 count2 = 0
 for (x in files_names){
   if (file.exists(x)){

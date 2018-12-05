@@ -4,7 +4,7 @@
 from pathlib import Path
 import argparse
 import os
-import DROPAcore as ex
+import ExpressGenes2_1_1 as ex
 import shutil
 
 ############ INPUT OF VARIABLES ###################
@@ -160,17 +160,17 @@ if shuffle != 0:
             resultscheck=ex.CheckExpression(resultsgain[0],rnaSeq,limit=limit,peakname=data2+'shuffle'+str(x+1),TSSTTSdistance=5000)
 
         try:
-            resultsFeatureAssignOver=ex.FeatureAssign(resultscheck[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='Expressed_')
+            resultsFeatureAssignOver=ex.FeatureAssign(resultscheck[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='Expressed')
 
-            finalResultsOver=ex.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed_')
+            finalResultsOver=ex.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed')
 
         except:
             print('There is no peaks in express genes in Shuffle '+ str(x+1))
 
         try:
-            resultsFeatureAssignUnder=ex.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed_')
+            resultsFeatureAssignUnder=ex.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
-            finalResultsUnder=ex.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed_')
+            finalResultsUnder=ex.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
         except:
             print('There is no peaks in unexpress genes in Shuffle ' + str(x+1))
@@ -194,9 +194,9 @@ if shuffle != 0:
     cmd = ' '.join(cmd)
     os.system(cmd)
 
-    #for x in range(0, shuffle):
-    #    shutil.rmtree(data2 + 'shuffle' + str(x + 1), ignore_errors=True)
-     #   os.remove(data2 + 'shuffle' + str(x + 1) + ".bed")
+    # for x in range(0, shuffle):
+    #     shutil.rmtree(data2 + 'shuffle' + str(x + 1), ignore_errors=True)
+    #     os.remove(data2 + 'shuffle' + str(x + 1) + ".bed")
 
 my_file = Path("./" + data2 + "/" + data2 +"Genes")
 if my_file.is_file():
