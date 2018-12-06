@@ -19,3 +19,7 @@ As input, DROPA requires three files, which are:
 ●	A reference set containing information about genes features (5’UTR, 3’UTR, exon, intron, etc.) in BED format and a gene reference in Gene Transfer Format (GTF);
 
 ●	A 2-column gene expression table  containing the name of each gene and its expression value (FPKM, TPM, microarray expression value, etc.). If this file is not provided, then DROPA skips the gene expression evaluation and annotates each query peak to the gene with the largest overlap.
+
+
+To test the program try:
+python DROPA_v0.1.py -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 Test.DRIP_peaks.bed
