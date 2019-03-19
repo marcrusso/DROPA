@@ -1,4 +1,4 @@
-# DROPA
+# DROPA v1.0
 
 
 DROPA uses Python3 (vers. Python 3.6.4) and R (vers 3.5.1).
