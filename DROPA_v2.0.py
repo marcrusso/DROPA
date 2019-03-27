@@ -20,6 +20,7 @@ parser.add_argument('-rnaseq',type=str, help='Rna-seq file, default is isoforms.
 parser.add_argument('-li',type=float, help='FPKM limit, default is 0.5')
 parser.add_argument('-dis',type=int, help='distance from TSS and TTS, default is 5000 bases')
 parser.add_argument('-shuffles',type=int , help='Numbers for a shuffle comparison, 0 for none. Default is 0')
+parser.add_argument('-gen',type=str , help='File containing the name of the chromosomes and the size of each one, used for the shuffle')
 parser.set_defaults(rnaseq='isoforms.fpkm_tracking',li=0.5,dis=5000,shuffle=False)
 
 data=parser.parse_args().namefile
@@ -29,6 +30,7 @@ distance=parser.parse_args().dis
 limit=parser.parse_args().li
 shuffle=parser.parse_args().shuffles
 annotation = parser.parse_args().a
+chromosome_size_file = parser.parse_args().gen
 
 
 ################### BODY OF THE PROGRAM ###################
@@ -39,7 +41,7 @@ annotation = str('./' + str(annotation) + '/'+'anotationgen.bed')
 if shuffle == None:
     shuffle = 0
 
-gainresults=ex.PeakOverlap(annotation,data,tssdistance=distance,peakname=data2)
+gainresults = ex.PeakOverlap(annotation,data,tssdistance=distance,peakname=data2)
 
 checkresults=ex.CheckExpression(gainresults[0],rnaSeq,limit=limit,peakname=data2,TSSTTSdistance=distance)
 
@@ -129,7 +131,7 @@ splot.Dropa_histogram('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data
 ############### MAKE THE COMPARATION WITH SHUFFLE #######################
 if shuffle != 0:
     for x in range(0, shuffle):
-        shufflepeaks=ex.randpeak(data,x+1,data2)
+        shufflepeaks=ex.randpeak(data,x+1,data2,chromosome_size_file)
 
         resultsgain=ex.PeakOverlap(annotation,shufflepeaks,tssdistance=distance,peakname=data2+'shuffle'+str(x+1))
 

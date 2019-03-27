@@ -14,7 +14,7 @@ from intervaltree import IntervalTree
 def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
     LuckPeak, LuckGen, LuckTree, LuckBegin , Genlist = {},{},{},{},{}
 
-    ### CREATE A TREE VARIABLE
+####### CREATE A INTERVALTREE VARIABLE
 
     tree = IntervalTree()
     n = 0
@@ -23,12 +23,8 @@ def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
     intergenic_output = {}
     for lines in open(peaksfile):
         fields = lines.split()
-        namegain = fields[3]
-        chromogain = fields[0]
-        begingain = int(fields[1])
-        endgain = int(fields[2])
-        space4 = fields[4]
-        space5 = fields[5]
+        namegain, chromogain, begingain, endgain = fields[3], fields[0], int(fields[1]), int(fields[2])
+        space4, space5 = fields[4], fields[5]
         LuckPeak[namegain] = [chromogain, begingain, endgain, namegain, space4, space5]
         LuckBegin[begingain] = [namegain,begingain,endgain]
         intergenic = intergenic|set([namegain])
@@ -417,8 +413,8 @@ def FeatureAssign(cleanpeaklist,UTR5='5UTR.bed',UTR3='3UTR.bed',CDE='CDE.bed',pe
     return ('./'+peakname+'/'+lap+peakname+'exon')
 
 
-def randpeak(peaks=None, numbershuffle='', Namefile=''):
-    command = 'bedtools shuffle -chrom -i \''+peaks+'\' -g hg19.genome -noOverlapping > '+Namefile+'shuffle'+str(numbershuffle)+'.bed'
+def randpeak(peaks=None, numbershuffle='', Namefile='', genome_file =""):
+    command = 'bedtools shuffle -chrom -i \''+peaks+'\' -g ' + genome_file + ' -noOverlapping > '+Namefile+'shuffle'+str(numbershuffle)+'.bed'
     os.system(command)
     return(Namefile+'shuffle'+str(numbershuffle)+'.bed')
 
