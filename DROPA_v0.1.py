@@ -13,15 +13,15 @@ warnings.filterwarnings("ignore")
 ############ INPUT OF VARIABLES ###################
 
 parser = argparse.ArgumentParser(description='Input program')
-parser.add_argument('namefile', type=str, help='bed file with peaks')
-parser.add_argument('-a', type=str, help='folder with gen annotation files')
-parser.add_argument('-o',type=str,help= 'Direction of the output')
-parser.add_argument('-rnaseq',type=str, help='Rna-seq file, default is isoforms.fpkm_tracking. None for no FPKM comparison')
-parser.add_argument('-li',type=float, help='FPKM limit, default is 0.5')
-parser.add_argument('-dis',type=int, help='distance from TSS and TTS, default is 5000 bases')
-parser.add_argument('-shuffles',type=int , help='Numbers for a shuffle comparison, 0 for none. Default is 0')
-parser.add_argument('-gsize',type=str , help='File containing the name of the chromosomes and the size of each one, used for the shuffle')
-parser.set_defaults(rnaseq='isoforms.fpkm_tracking',li=0.5,dis=5000,shuffle=False)
+parser.add_argument('namefile', type=str, help='Query BED file')
+parser.add_argument('-a', type=str, help='Gene Reference Folder')
+parser.add_argument('-o',type=str,help= 'Output directory')
+parser.add_argument('-rnaseq',type=str, help='Expression file. Default is "None"')
+parser.add_argument('-li',type=float, help='Expression Threshold. Default is 0.5')
+parser.add_argument('-dis',type=int, help='Distance from TSS and TTS, to define Upstream and Downstream regions. Default is 5000')
+parser.add_argument('-shuffles',type=int , help='Number of randomization for enrichment, False for none. Default is False')
+parser.add_argument('-gsize',type=str , help='Genome size file, used for shuffle')
+parser.set_defaults(rnaseq='None',li=0.5,dis=5000,shuffle=False)
 
 data=parser.parse_args().namefile
 data2=parser.parse_args().o
@@ -53,7 +53,7 @@ try:
     splot.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
                                       './' + data2 + '/' + data2 + "_Expressed_Annotation.table", "Expressed_" + data2, data2, False)
 except:
-    print('There is no peaks in express genes')
+    print('There is no peaks in expressed genes')
     fileOver = "None"
 
 try:
@@ -64,7 +64,7 @@ try:
     splot.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
                                       './' + data2 + '/' + data2 + "_NotExpressed_Annotation.table", "NotExpressed_" + data2, data2, False)
 except:
-    print('There is no peaks in unexpress genes')
+    print('There is no peaks in unexpressed genes')
     fileUnder = "None"
 
 #### Make a plot of the total percent of each zone been overlap by a peak for express and not express genes together
