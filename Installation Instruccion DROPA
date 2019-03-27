@@ -19,7 +19,7 @@ Once installed we can install all the different packages for the program. Here i
 	- matplotlib
 	- upsetplot
 
-for installing the package you just have to type this in the console without the  Apostrophes (“”)
+for installing the package, you just have to type this in the console without the Apostrophes (“”)
 
 
 	pip3 install “name of the package” 
@@ -28,11 +28,11 @@ Once installed all the packages we can continue with the next program necessary 
 
 2) Bedtools
 
-bedtools is also use in the core of DROPA, specifically for the creation of random samples. To install bedtools we can use the console and type:
+bedtools is also use in the core of DROPA, specifically for the creation of random data. To install bedtools we can use the console and type:
 
 	sudo apt-get install bedtools
 
-Once done we are ready to continue.
+Once done we are ready to use the program.
 
 3) Example
 
