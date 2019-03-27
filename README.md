@@ -1,26 +1,59 @@
 # DROPA v2.0
 
+# Installation
+1) Python:
 
-DROPA uses Python3.
-Python modules required:
-•	numpy (vers 1.14.0)
-•	tqdm (vers 4.23.4)
-•	pandas (vers 0.22.0)
-•	intervaltree (vers 2.1.0)
-R libraries required: 
-•	UpSetR (vers. 1.3.2)
+DROPA core is written in Python 3.5 You can install Python directly from the Console with the command:
+	
+	sudo apt-get install python3
 
+Install Pip to get the packages that DROPA needs for running.
+
+	sudo apt install python3-pip
+
+Here is the list of required packages:
+	
+  - numpy(v. 1.16.1)
+  - pandas(v. 0.24.1)
+  - tqdm(v. 4.31.1)
+  - intervaltree(v. 3.0.2)
+  - matplotlib(v. 3.0.3)
+  - upsetplot(v. 0.2.1)
+  - argparse(v. 1.4.0)
+	
+To install them:
+
+	pip3 install numpy pandas tqdm intervaltree matplotlib upsetplot argparse
+
+
+2) Bedtools
+
+bedtools is required specifically for the creation of random data. To install bedtools:
+
+	sudo apt-get install bedtools
+Bedtools shuffle requires a genome size file structured as follow:
+	
+	<ChromosomeName><TAB><ChromosomeSize>
+	
+For hg19 this file is provided.
+
+  
+# Usage
 DROPA was tested on a machine running Ubuntu OS (vers. 16.04 LTS and 18.04 LTS)
 
 As input, DROPA requires four files, which are:
 
 ●	A file containing query peak locations in Browser Extensible Data (BED) format (BED6 and BED12 are supported);
 
-●	A reference set containing information about genes features (5’UTR, 3’UTR, exon, intron, etc.) in BED format and a gene reference in Gene Transfer Format (GTF);
+●	A reference set containing information about genes features (5’UTR, 3’UTR, CDE, etc.) in BED format and a gene reference in BED format; Reference sets for hg19 (Ensembl, UCSCgenes and RefSeq) are provided. Other reference set can be created downloading data from UCSC Table Browser (https://genome.ucsc.edu/cgi-bin/hgTables).
 
-●	A 2-column gene expression table  containing the name of each gene and its expression value (FPKM, TPM, microarray expression value, etc.). If this file is not provided, then DROPA skips the gene expression evaluation and annotates each query peak to the gene with the largest overlap.
+●	A gene expression table  containing the name of each gene in the refernce set and its expression value (FPKM, TPM, microarray expression value, etc.), structured as follow:
+	
+	<GeneName><TAB><ExprValue>
 
-● For the shuffle is require a file with 2 columns: the first one containing the name of the chromosomes and the second the quantity of bases (size) if the corresponding chromosome.
+If this file is not provided, then DROPA skips the gene expression evaluation and annotates each query peak to the gene with the largest overlap.
 
-To test the program try:
-python DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 
+
+To test the program (from installation folder):
+
+	python DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 
