@@ -1,4 +1,4 @@
-# DROPA v2.0
+# DROPA v0.1
 
 # Installation
 1) Python:
@@ -56,4 +56,4 @@ If this file is not provided, then DROPA skips the gene expression evaluation an
 
 To test the program (from installation folder):
 
-	python DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 -gsize hg19.genome
+	python DROPA_v0.1.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 -gsize hg19.genome
