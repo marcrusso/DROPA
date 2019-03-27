@@ -54,6 +54,6 @@ As input, DROPA requires four files, which are:
 If this file is not provided, then DROPA skips the gene expression evaluation and annotates each query peak to the gene with the largest overlap.
 
 
-To test the program try:
+To test the program try (from installation folder):
 
 	python DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 
