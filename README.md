@@ -47,7 +47,11 @@ As input, DROPA requires four files, which are:
 
 ●	A reference set containing information about genes features (5’UTR, 3’UTR, CDE, etc.) in BED format and a gene reference in BED format; Reference sets for hg19 (Ensembl, UCSCgenes and RefSeq) are provided. Other reference set can be created downloading data from UCSC Table Browser (https://genome.ucsc.edu/cgi-bin/hgTables).
 
-●	A 2-column gene expression table  containing the name of each gene in the refernce set and its expression value (FPKM, TPM, microarray expression value, etc.). If this file is not provided, then DROPA skips the gene expression evaluation and annotates each query peak to the gene with the largest overlap.
+●	A gene expression table  containing the name of each gene in the refernce set and its expression value (FPKM, TPM, microarray expression value, etc.), structured as follow:
+	
+	<GeneName><TAB><ExprValue>
+
+If this file is not provided, then DROPA skips the gene expression evaluation and annotates each query peak to the gene with the largest overlap.
 
 
 To test the program try:
