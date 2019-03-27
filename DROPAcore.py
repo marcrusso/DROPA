@@ -47,9 +47,9 @@ def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
                         endgen = int(fields2[2]) + tssdistance
                         chromogen = fields2[0]
                         strand = fields2[5]
-                        if tree.search(begingen, endgen) != set():
+                        if tree.overlap(begingen, endgen) != set():
                             Genlist[nameid] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand]
-                            for x in tree.search(begingen, endgen):
+                            for x in tree.overlap(begingen, endgen):
                                 LuckGen[m] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand] + LuckBegin[x.begin]
                                 intergenic = intergenic - set([LuckBegin[x.begin][0]])
                                 m+=1
@@ -73,9 +73,9 @@ def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
             endgen = int(fields2[2]) + tssdistance
             chromogen = fields2[0]
             strand = fields2[5]
-            if tree.search(begingen, endgen) != set():
+            if tree.overlap(begingen, endgen) != set():
                 Genlist[nameid] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand]
-                for x in tree.search(begingen, endgen):
+                for x in tree.overlap(begingen, endgen):
                     LuckGen[m] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand] + LuckBegin[x.begin]
                     intergenic = intergenic - set([LuckBegin[x.begin][0]])
                     m += 1
@@ -314,7 +314,7 @@ def TableCreator(peakexon,namepeak='null',lap='null'):
     resscore=[]
     repeattimes=[]
     uniquepeak=np.unique(peakname)
-    for peak in tqdm(range(len(uniquepeak)), desc='Making the Table Of Which part are been cover by the Peak'):
+    for peak in tqdm(range(len(uniquepeak)), desc='TableCreator'):
         indices = np.where(peakname==uniquepeak[peak])
         countrep = -1
         reschromo.append(exonchromo[indices][0])
@@ -384,23 +384,23 @@ def TableCreator(peakexon,namepeak='null',lap='null'):
 def FeatureAssign(cleanpeaklist,UTR5='5UTR.bed',UTR3='3UTR.bed',CDE='CDE.bed',peakname='null',lap='null'):
     print('Creating the list of Exons for Analisis')
     tic=time.clock()
-    peaktable=pd.read_table(cleanpeaklist)
+    peaktable=pd.read_csv(cleanpeaklist, sep="\t")
     #   Getting the 5UTR data and merging with the table of peaks in genes
-    UTR5table = pd.read_table(UTR5, header=None)
+    UTR5table = pd.read_csv(UTR5, header=None, sep="\t")
     UTR5table = UTR5table.rename(columns={0:'Chromo',1: 'BeginExon',2: 'EndExon',3: 'Gen_TransID'})
     del UTR5table[4],UTR5table[5],UTR5table['Chromo']
     mergedUTR5peak = pd.merge(peaktable, UTR5table, left_on='Gen_TransID', right_on='Gen_TransID', how='inner')
     mergedUTR5peak['Type'] = pd.Series('5UTR', index=mergedUTR5peak.index)
 
     #   Getting the 3UTR data and merging with the table of peaks in genes
-    UTR3table = pd.read_table(UTR3, header=None)
+    UTR3table = pd.read_csv(UTR3, header=None, sep="\t")
     UTR3table = UTR3table.rename(columns={0:'Chromo',1: 'BeginExon',2: 'EndExon',3: 'Gen_TransID'})
     del UTR3table[4],UTR3table[5],UTR3table['Chromo']
     mergedUTR3peak = pd.merge(peaktable, UTR3table, left_on='Gen_TransID', right_on='Gen_TransID', how='inner')
     mergedUTR3peak['Type'] = pd.Series('3UTR', index=mergedUTR3peak.index)
 
     #   Getting the 3UTR data and merging with the table of peaks in genes
-    CDEtable = pd.read_table(CDE, header=None)
+    CDEtable = pd.read_csv(CDE, header=None, sep="\t")
     CDEtable = CDEtable.rename(columns={0:'Chromo',1: 'BeginExon',2: 'EndExon',3: 'Gen_TransID'})
     del CDEtable[4],CDEtable[5],CDEtable['Chromo']
     mergedCDEpeak = pd.merge(peaktable, CDEtable, left_on='Gen_TransID', right_on='Gen_TransID', how='inner')
