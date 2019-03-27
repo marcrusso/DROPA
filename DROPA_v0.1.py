@@ -20,7 +20,7 @@ parser.add_argument('-rnaseq',type=str, help='Rna-seq file, default is isoforms.
 parser.add_argument('-li',type=float, help='FPKM limit, default is 0.5')
 parser.add_argument('-dis',type=int, help='distance from TSS and TTS, default is 5000 bases')
 parser.add_argument('-shuffles',type=int , help='Numbers for a shuffle comparison, 0 for none. Default is 0')
-parser.add_argument('-gen',type=str , help='File containing the name of the chromosomes and the size of each one, used for the shuffle')
+parser.add_argument('-gsize',type=str , help='File containing the name of the chromosomes and the size of each one, used for the shuffle')
 parser.set_defaults(rnaseq='isoforms.fpkm_tracking',li=0.5,dis=5000,shuffle=False)
 
 data=parser.parse_args().namefile
