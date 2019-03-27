@@ -56,4 +56,4 @@ If this file is not provided, then DROPA skips the gene expression evaluation an
 
 To test the program (from installation folder):
 
-	python DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 
+	python DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation/ -o TEST_out -rnaseq Test_RefSeq_Expression -shuffle 2 -gen hg19.genome
