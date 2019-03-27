@@ -41,7 +41,7 @@ For hg19 this file is provided.
 # Usage
 DROPA was tested on a machine running Ubuntu OS (vers. 16.04 LTS and 18.04 LTS)
 
-As input, DROPA requires four files, which are:
+As input, DROPA requires three files, which are:
 
 ●	A file containing query peak locations in Browser Extensible Data (BED) format (BED6 and BED12 are supported);
 
