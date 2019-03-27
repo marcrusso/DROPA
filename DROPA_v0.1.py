@@ -146,7 +146,7 @@ if shuffle != 0:
             finalResultsOver=ex.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed')
 
         except:
-            print('There is no peaks in express genes in Shuffle '+ str(x+1))
+            print('There is no peaks in expressed genes in Shuffle '+ str(x+1))
 
         try:
             resultsFeatureAssignUnder=ex.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed')
@@ -154,7 +154,7 @@ if shuffle != 0:
             finalResultsUnder=ex.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
         except:
-            print('There is no peaks in unexpress genes in Shuffle ' + str(x+1))
+            print('There is no peaks in unexpressed genes in Shuffle ' + str(x+1))
         h, k = 1, 1
         if fileOver != "None":
             if fileUnder != "None":
