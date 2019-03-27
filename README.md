@@ -31,6 +31,10 @@ To install them:
 bedtools is required specifically for the creation of random data. To install bedtools:
 
 	sudo apt-get install bedtools
+Bedtools shuffle requires a genome size file structured as follow:
+<ChromosomeName><TAB><ChromosomeSize>
+For hg19 this file is provided.
+
   
 # Usage
 DROPA was tested on a machine running Ubuntu OS (vers. 16.04 LTS and 18.04 LTS)
