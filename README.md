@@ -32,7 +32,9 @@ bedtools is required specifically for the creation of random data. To install be
 
 	sudo apt-get install bedtools
 Bedtools shuffle requires a genome size file structured as follow:
-<ChromosomeName><TAB><ChromosomeSize>
+	
+	<ChromosomeName><TAB><ChromosomeSize>
+	
 For hg19 this file is provided.
 
   
