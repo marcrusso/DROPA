@@ -1,16 +1,16 @@
-﻿Welcome to the installation guide for DROPA. To begin with we need firstly to say that DROPA has been only tested in Ubuntu and because it use some line commands in Linux terminal (Bash) is only possible to use it on Ubuntu or any Linux version.
+Installation guide for DROPA
 
 1) Python:
 
-DROPA core is written in Python, specifically for Python 3.5. If you try lower version of Python it may have some problems. You can install Python directly from the Console with the command:
+DROPA core is written in Python 3.5 You can install Python directly from the Console with the command:
 	
 	sudo apt-get install python3
 
-Once we had python installed we can proceed with the instalation of “pip”. Pip is a useful tool from python to install the packages that DROPA needs for running. The next command line would get you pip install (important to note that if you have more than one version of python it will probably not work, for this you need to consult directly on stackoverflow or other consulting website):  
+Install Pip  to get the packages that DROPA needs for running.
 
 	sudo apt install python3-pip
 
-Once installed we can install all the different packages for the program. Here is the list of packages that you will need:
+Here is the list of packages that you will need:
 	
 	- numpy
 	- pandas
@@ -18,27 +18,17 @@ Once installed we can install all the different packages for the program. Here i
 	- intervaltree
 	- matplotlib
 	- upsetplot
+	
+To install them:
 
-for installing the package, you just have to type this in the console without the Apostrophes (“”)
+	pip3 install numpy pandas tqdm intervaltree matplotlib upsetplot
 
-
-	pip3 install “name of the package” 
-
-Once installed all the packages we can continue with the next program necessary for DROPA
 
 2) Bedtools
 
-bedtools is also use in the core of DROPA, specifically for the creation of random data. To install bedtools we can use the console and type:
+bedtools is required specifically for the creation of random data. To install bedtools:
 
 	sudo apt-get install bedtools
 
-Once done we are ready to use the program.
 
-3) Example
-
-There is a test added to the program. for testing just write in the command line in the terminal where the Dropa is placed:
-
-python3 DROPA_v2.0.py Test.DRIP_peaks.bed -a RefSeqAnnotation -o Test2 -rnaseq Test_RefSeq_Expression
-
-For a shuffle just add "-shuffle X" at the end, where X is the quantity of desire shuffles
 
