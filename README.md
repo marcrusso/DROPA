@@ -6,11 +6,11 @@
 DROPA core is written in Python 3.5 You can install Python directly from the Console with the command:
 
 	sudo apt-get install python3
-	sudo apt-ger install python-dev
+	sudo apt-get install python-dev
 
 Install Pip to get the packages that DROPA needs for running.
 
-	sudo apt install python3-pip
+	sudo apt-get install python3-pip
 
 Here is the list of required packages:
 
