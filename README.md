@@ -37,19 +37,16 @@ Bedtools shuffle requires a genome size file structured as follow:
 
 	<ChromosomeName><TAB><ChromosomeSize>
 
-For hg19, mm9 and mm10 this file is provided.
-
-	mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e "select chrom, size from hg19.chromInfo"  > hg19.genome  
-
+For hg19, mm9 and mm10 this file is provided. Check the Wiki for other genome size files creation.
 
 # Usage
 DROPA was tested on a machine running Ubuntu OS (vers. 16.04 LTS and 18.04 LTS)
 
 As input, DROPA requires three files, which are:
 
-●	A file containing query peak locations in Browser Extensible Data (BED) format (BED6 and BED12 are supported);
+●	A file containing query peak locations in Browser Extensible Data (BED) format (BED6 and BED12 are supported); BED file must be sorted by chromosome.
 
-●	A reference set containing information about genes features (5’UTR, 3’UTR, CDE, etc.) in BED format and a gene reference in BED format; Reference sets for hg19 (Ensembl, UCSCgenes and RefSeq) and RefSeq for mm9 and mm10 are provided. Other reference set can be created downloading data from UCSC Table Browser (https://genome.ucsc.edu/cgi-bin/hgTables) or requested.
+●	A reference set containing information about genes features (5’UTR, 3’UTR, Coding Exons) in BED format and a gene reference in BED12 format; Reference sets for hg19 (Ensembl, UCSCgenes and RefSeq) and RefSeq for mm9 and mm10 are provided. Check the Wiki for custom reference sets creation.
 
 ●	A gene expression table  containing the name of each gene in the reference set and its expression value (FPKM, TPM, microarray expression value, etc.), structured as follow:
 
