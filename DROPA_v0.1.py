@@ -4,8 +4,7 @@
 from pathlib import Path
 import argparse
 import os
-import DROPAcore as ex
-import SummaryPlot as splot
+import DROPAcore as core
 import warnings
 import shutil
 warnings.filterwarnings("ignore")
@@ -43,27 +42,27 @@ if limit == None:
 if shuffle == None:
     shuffle = 0
 
-gainresults = ex.PeakOverlap(annotation,data,tssdistance=distance,peakname=data2)
+gainresults = core.PeakOverlap(annotation,data,tssdistance=distance,peakname=data2)
 
-checkresults=ex.CheckExpression(gainresults[0],rnaSeq,limit=limit,peakname=data2,TSSTTSdistance=distance)
+checkresults=core.CheckExpression(gainresults[0],rnaSeq,limit=limit,peakname=data2,TSSTTSdistance=distance)
 
 try:
-    FeatureAssignOverResults=ex.FeatureAssign(checkresults[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2,lap='Expressed_')
-    ExonOverResults=ex.TableCreator(FeatureAssignOverResults,namepeak=data2,lap='Expressed')
+    FeatureAssignOverResults=core.FeatureAssign(checkresults[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2,lap='Expressed_')
+    ExonOverResults= core.TableCreator(FeatureAssignOverResults,namepeak=data2,lap='Expressed')
     fileOver = "./" + data2 + "/Expressed_" + data2 +".csv"
-    splot.Upsetplotting('./' + data2 + '/' + data2 + '_Expressed_Annotation.table',"Expressed_"+data2, data2)
-    splot.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
+    core.Upsetplotting('./' + data2 + '/' + data2 + '_Expressed_Annotation.table',"Expressed_"+data2, data2)
+    core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
                                       './' + data2 + '/' + data2 + "_Expressed_Annotation.table", "Expressed_" + data2, data2, False)
 except:
     print('There is no peaks in express genes')
     fileOver = "None"
 
 try:
-    FeatureAssignUnderResults=ex.FeatureAssign(checkresults[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2,lap='NotExpressed_')
-    ExonUnderResults=ex.TableCreator(FeatureAssignUnderResults,namepeak=data2,lap='NotExpressed')
+    FeatureAssignUnderResults=core.FeatureAssign(checkresults[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2,lap='NotExpressed_')
+    ExonUnderResults=core.TableCreator(FeatureAssignUnderResults,namepeak=data2,lap='NotExpressed')
     fileUnder = "./" + data2 + "/NotExpressed_" + data2 +".csv"
-    splot.Upsetplotting('./' + data2 + '/' + data2 + '_NotExpressed_Annotation.table', 'NotExpressed_'+data2, data2)
-    splot.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
+    core.Upsetplotting('./' + data2 + '/' + data2 + '_NotExpressed_Annotation.table', 'NotExpressed_'+data2, data2)
+    core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
                                       './' + data2 + '/' + data2 + "_NotExpressed_Annotation.table", "NotExpressed_" + data2, data2, False)
 except:
     print('There is no peaks in unexpress genes')
@@ -122,38 +121,38 @@ elif fileUnder != "None":
                 for line in infile:
                     outfile.write(line)
 
-splot.Upsetplotting('./' + data2 + '/' + data2 + '_All_Annotation.table',"All"+data2, data2)
+core.Upsetplotting('./' + data2 + '/' + data2 + '_All_Annotation.table',"All"+data2, data2)
 
-splot.Dropa_pie_Intergenic('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + 'PeaksInGenes',data2, data2)
+core.Dropa_pie_Intergenic('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + 'PeaksInGenes',data2, data2)
 
-splot.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + "_All_Annotation.table","All_"+data2, data2, True)
+core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + "_All_Annotation.table","All_"+data2, data2, True)
 
-splot.Dropa_histogram('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + "_All_Annotation.table", data, "All_"+data2, data2)
+core.Dropa_histogram('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + "_All_Annotation.table", data, "All_"+data2, data2)
 
 ############### MAKE THE COMPARATION WITH SHUFFLE #######################
 if shuffle != 0:
     for x in range(0, shuffle):
-        shufflepeaks=ex.randpeak(data,x+1,data2,chromosome_size_file)
+        shufflepeaks=core.randpeak(data,x+1,data2,chromosome_size_file)
 
-        resultsgain=ex.PeakOverlap(annotation,shufflepeaks,tssdistance=distance,peakname=data2+'shuffle'+str(x+1))
+        resultsgain=core.PeakOverlap(annotation,shufflepeaks,tssdistance=distance,peakname=data2+'shuffle'+str(x+1))
 
         if os.stat(resultsgain[0]).st_size == 0:
             print('Shuffle1 has no Intergenic Peaks')
         else:
-            resultscheck=ex.CheckExpression(resultsgain[0],rnaSeq,limit=limit,peakname=data2+'shuffle'+str(x+1),TSSTTSdistance=5000)
+            resultscheck=core.CheckExpression(resultsgain[0],rnaSeq,limit=limit,peakname=data2+'shuffle'+str(x+1),TSSTTSdistance=5000)
 
         try:
-            resultsFeatureAssignOver=ex.FeatureAssign(resultscheck[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='Expressed')
+            resultsFeatureAssignOver=core.FeatureAssign(resultscheck[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='Expressed')
 
-            finalResultsOver=ex.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed')
+            finalResultsOver=core.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed')
 
         except:
             print('There is no peaks in express genes in Shuffle '+ str(x+1))
 
         try:
-            resultsFeatureAssignUnder=ex.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed')
+            resultsFeatureAssignUnder=core.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
-            finalResultsUnder=ex.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed')
+            finalResultsUnder=core.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
         except:
             print('There is no peaks in unexpress genes in Shuffle ' + str(x+1))
@@ -208,7 +207,7 @@ if shuffle != 0:
                 with open(filenames) as infile:
                     for line in infile:
                         outfile.write(line)
-    splot.Dropa_Enrichment('./' + data2 + '/' + data2 + '_intergenic.bed', './' + data2 + '/' + data2 + "_All_Annotation.table", shuffle, data2, data2)
+    core.Dropa_Enrichment('./' + data2 + '/' + data2 + '_intergenic.bed', './' + data2 + '/' + data2 + "_All_Annotation.table", shuffle, data2, data2)
 
     for x in range(1, shuffle+1):
         shutil.rmtree(data2 + 'shuffle' + str(x), ignore_errors=True)
