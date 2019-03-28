@@ -30,6 +30,7 @@ To install them:
 Bedtools is required specifically for the creation of random data. To install bedtools:
 
 	sudo apt-get install bedtools
+	
 
 Bedtools shuffle requires a genome size file structured as follow:
 
