@@ -39,6 +39,8 @@ Bedtools shuffle requires a genome size file structured as follow:
 
 For hg19, mm9 and mm10 this file is provided.
 
+	mysql --user=genome --host=genome-mysql.cse.ucsc.edu -A -e "select chrom, size from hg19.chromInfo"  > hg19.genome  
+
 
 # Usage
 DROPA was tested on a machine running Ubuntu OS (vers. 16.04 LTS and 18.04 LTS)
