@@ -6,6 +6,7 @@
 DROPA core is written in Python 3.5 You can install Python directly from the Console with the command:
 
 	sudo apt-get install python3
+	sudo apt-ger install python-dev
 
 Install Pip to get the packages that DROPA needs for running.
 
@@ -23,19 +24,20 @@ Here is the list of required packages:
 
 To install them:
 
-	pip3 install numpy pandas tqdm intervaltree matplotlib upsetplot argparse
-	
+	pip3 install numpy pandas tqdm intervaltree matplotlib argparse
+	pip3 install upsetplot
+
 2) Bedtools
 
 Bedtools is required specifically for the creation of random data. To install bedtools:
 
 	sudo apt-get install bedtools
-	
+
 Bedtools shuffle requires a genome size file structured as follow:
 
 	<ChromosomeName><TAB><ChromosomeSize>
 
-For hg19, mm9 and mm10 this file is provided. 
+For hg19, mm9 and mm10 this file is provided.
 
 
 # Usage
@@ -57,4 +59,3 @@ If this file is not provided, then DROPA skips the gene expression evaluation an
 To test the program (from installation folder):
 
 	python3 DROPA_v0.1.py Test_hg19_DRIP_peaks.bed -ref GeneReference/hg19_RefSeq -o TEST_output -ex Test_hg19_RefSeq_Expression -shuffle 2 -gsize GeneReference/hg19.genome
-
