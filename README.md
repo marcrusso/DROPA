@@ -24,18 +24,18 @@ Here is the list of required packages:
 To install them:
 
 	pip3 install numpy pandas tqdm intervaltree matplotlib upsetplot argparse
-
-
+	
 2) Bedtools
 
 Bedtools is required specifically for the creation of random data. To install bedtools:
 
 	sudo apt-get install bedtools
+
 Bedtools shuffle requires a genome size file structured as follow:
 
 	<ChromosomeName><TAB><ChromosomeSize>
 
-For hg19, mm9 and mm10 this file is provided.
+For hg19, mm9 and mm10 this file is provided. 
 
 
 # Usage
