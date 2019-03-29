@@ -1,5 +1,7 @@
 # DROPA v1.0.0
 
+DROPA is a fully customizable peak-annotation tool optimized for DRIP-seq peaks, which allows a finest gene annotation based on gene expression information. Its output can easily be integrated into pipelines to perform downstream analyses, while useful and informative summary plots and statistical enrichment tests can be produced. Although it is developed for R-loop mapping, DROPA can also be used to annotate other genomic sequencing data as in the case of Histone marks IP-seq, DNAse-seq, FAIRE-seq.
+
 # Installation
 1) Python:
 
