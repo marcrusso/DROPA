@@ -1,4 +1,4 @@
-# DROPA v0.1
+# DROPA v1.0.0
 
 # Installation
 1) Python:
