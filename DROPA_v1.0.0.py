@@ -20,7 +20,7 @@ parser.add_argument('-lim',type=float, help='Expression Threshold. Default is 0.
 parser.add_argument('-dis',type=int, help='Distance from TSS and TTS, to define Upstream and Downstream regions. Default is 5000')
 parser.add_argument('-shuffle',type=int , help='Numbers for a shuffle comparison, 0 for none. Default is 0')
 parser.add_argument('-gsize',type=str , help='Genome size file, used for shuffle')
-parser.set_defaults(rnaseq='None',li=0.5,dis=5000,shuffle=False)
+parser.set_defaults(ex='None',lim=0.5,dis=5000,shuffle=0)
 
 data=parser.parse_args().namefile
 data2=parser.parse_args().o
