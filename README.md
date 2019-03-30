@@ -59,4 +59,4 @@ If this file is not provided, then DROPA skips the gene expression evaluation an
 
 To test the program (from installation folder):
 
-	python3 DROPA_v0.1.py -ref GeneReference/hg19_RefSeq/ -o TEST -ex Test_hg19_RefSeq_Expression -shuffle 2 -gsize GeneReference/hg19.genome Test_hg19_DRIP_peaks.bed 
+	python3 DROPA_v1.0.0.py -ref GeneReference/hg19_RefSeq/ -o TEST -ex Test_hg19_RefSeq_Expression -shuffle 2 -gsize GeneReference/hg19.genome Test_hg19_DRIP_peaks.bed 
