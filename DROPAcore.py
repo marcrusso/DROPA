@@ -586,6 +586,7 @@ def Dropa_histogram(intergenic_file,All_Anotation_table, Peak_file, name_output,
     bar_list[5].set_facecolor('y')
     bar_list[6].set_facecolor('b')
     fig1.suptitle('Frequency of peaks in parts of the genes')
+    pyplot.ylabel("Fraction (%)")
     pyplot.legend(bar_list, [labels[0]+"="+str(Quantity_intergenic),labels[1]+"="+ str(TSS_ocurrence),labels[2]+"="+ str(UTR5_ocurrence),labels[3]+"="+ str(Exon_ocurrence),labels[4]+"="+ str(Intron_ocurrence),labels[5]+"="+ str(UTR3_ocurrence) , labels[6]+"="+ str(TTS_ocurrence)] , loc="upper right",bbox_to_anchor=(1.1, 1.11))
     pyplot.xticks(x, labels)
     pyplot.savefig(folder+"/"+name_output+"Histogram.pdf")
@@ -678,6 +679,7 @@ def Dropa_Enrichment(intergenic_file,All_Anotation_table, number_shuffles, name_
     bar_list[6].set_facecolor('b')
     pyplot.legend(bar_list, [labels[0]+"="+str(enrichment_intergenic_ocurrence),labels[1]+"="+ str(enrichment_TSS_ocurrence),labels[2]+"="+ str(enrichment_UTR5_ocurrence),labels[3]+"="+ str(enrichment_Exon_ocurrence),labels[4]+"="+ str(enrichment_Intron_ocurrence),labels[5]+"="+ str(enrichment_UTR3_ocurrence) , labels[6]+"="+ str(enrichment_TTS_ocurrence)] , loc="upper right",bbox_to_anchor=(1.1, 1.11))
     pyplot.xticks(x, labels)
+    pyplot.ylabel("Enrichment over expected (Fold Change)")
     pyplot.savefig(folder+"/"+name_output+"_Enrichment.pdf")
 
 ############################################################################################################################
