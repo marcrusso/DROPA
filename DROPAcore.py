@@ -108,7 +108,7 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
     print('Checking Transcripts/genes overlapped by peaks and selecting the best match')
     if transcribe != None:
         if os.stat(transcribe).st_size == 0:
-            return print('RNA-seq file is empty')
+            return print('Expression file is empty')
         for line in open(transcribe, "r"):
             fields = line.split()
             if len(fields) != 2:
@@ -232,12 +232,12 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
                 else:
                     under_only += 1
     toc = time.clock()
-    print('Done in ' + str(round(toc - tic, 2)) + ' sec. Printing the results of the checking')
+    print('Done in ' + str(round(toc - tic, 2)) + ' sec. Printing results')
 
 
     ### ORDER THE RESULTS FOR OUTPUT AND SAVE THEM IN A FILE
     if len(nobest_transcript) > 0:
-        print('There are '+ str(len(nobest_transcript)) + ' peaks overlapping 2 or more genes/transcript with the same quantity of overlapping bases and no difference in expression level')
+        print('There are '+ str(len(nobest_transcript)) + ' peaks overlapping 2 or more genes/transcript with overlapping bases and no difference in expression level')
         w = csv.writer(open('./' + peakname + '/SameOverlapping' + peakname, "w"))
         for key, val in nobest_transcript.items():
             w.writerow([key, val])
@@ -264,15 +264,15 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
     #     print('No Unexpress genes with overlapping peaks')
 
     print(' Number of peaks: ' + str(len(peaks_to_transcripts)))
-    print(' There are ' + str(over_over) + ' peaks with overlapping genes and over the FPKM limit \n There are ' + str(under_over) + ' peaks with overlapping genes and under the expression threshold'
+    print(' There are ' + str(over_over) + ' peaks with overlapping genes and over the expression threshold \n There are ' + str(under_over) + ' peaks with overlapping genes and under the expression threshold'
               + '\n There are ' + str(
-          over_only) + ' peaks with no overlapping genes and over the FPKM limit \n There are ' + str(
-          under_only) + ' peaks with no overlapping genes and under the FPKM limit')
+          over_only) + ' peaks with no overlapping genes and over the expression threshold \n There are ' + str(
+          under_only) + ' peaks with no overlapping genes and under the expression threshold')
     results = open('./' + peakname + '/infoGenes' + peakname, 'w')
-    results.write(' Number of peaks: ' + str(len(peaks_to_transcripts)) +'\n'+' There are '+str(over_over)+' peaks with overlapping genes and over the FPKM limit \n There are '+str(under_over)+ ' peaks with overlapping genes and under the FPKM limit'
-        +'\n There are '+str(over_only)+' peaks with no overlapping genes and over the FPKM limit \n There are '+str(under_only)+' peaks with no overlapping genes and under the FPKM limit')
+    results.write(' Number of peaks: ' + str(len(peaks_to_transcripts)) +'\n'+' There are '+str(over_over)+' peaks with overlapping genes and over the expression threshold \n There are '+str(under_over)+ ' peaks with overlapping genes and under the expression threshold'
+        +'\n There are '+str(over_only)+' peaks with no overlapping genes and over the expression threshold \n There are '+str(under_only)+' peaks with no overlapping genes and under the expression threshold')
 
-    print('total peaks overlapping transcripts/genes: ' + str(over_over+over_only+under_over+under_only))
+    print('Total peaks overlapping transcripts/genes: ' + str(over_over+over_only+under_over+under_only))
 
     return ('./' + peakname + '/Expressed_' + peakname, './' + peakname + '/NotExpressed_' + peakname)
 
@@ -379,7 +379,7 @@ def TableCreator(peakexon,namepeak='null',lap='null'):
 # Need a bed file and for the 2 inputs, been one the list of the genes with the exons size and position and the other the clean list of gain or lost genes.
 
 def FeatureAssign(cleanpeaklist,UTR5='5UTR.bed',UTR3='3UTR.bed',CDE='CDE.bed',peakname='null',lap='null'):
-    print('Creating the list of Exons for Analisis')
+    print('FeatureAssign')
     tic=time.clock()
     peaktable=pd.read_csv(cleanpeaklist, sep="\t")
     #   Getting the 5UTR data and merging with the table of peaks in genes
@@ -460,7 +460,7 @@ def Dropa_pie_Intergenic(intergenic_file,peaks_in_genes,name_output,folder):
     all_array.append(len(set(intra_peaks)))
     labels = "Intergenic", "Intragenic"
     fig1, ax1 = pyplot.subplots()
-    fig1.suptitle('Percent of Intergenic and Intragenic peaks')
+    fig1.suptitle('Proportion of Intergenic and Intragenic peaks')
     ax1.axis('equal')
     wedges, texts, autotexts = ax1.pie(all_array,autopct='%1.1f%%')
     for w in wedges:
@@ -503,7 +503,7 @@ def Dropa_pie_AllwithIntergenic(intergenic_file,All_Anotation_table, name_output
         all_array = [all_array, TSS_ocurrence, UTR5_ocurrence, Exon_ocurrence, Intron_ocurrence, UTR3_ocurrence, TTS_ocurrence]
         labels = "Intergenic", "Upstream", "5`UTR", "Exon", "Intron","3`UTR", "Downstream"
         fig1, ax1 = pyplot.subplots()
-        fig1.suptitle('Proportion of peaks in parts of the genes')
+        fig1.suptitle('Proportion of peaks over gene features')
         ax1.axis('equal')
         wedges, texts, autotexts = ax1.pie(all_array,autopct='%1.1f%%')
         for w in wedges:
@@ -518,7 +518,7 @@ def Dropa_pie_AllwithIntergenic(intergenic_file,All_Anotation_table, name_output
     all_array2 = [TSS_ocurrence, UTR5_ocurrence, Exon_ocurrence, Intron_ocurrence, UTR3_ocurrence, TTS_ocurrence]
     labels = "Upstream", "5`UTR", "Exon", "Intron","3`UTR", "Downstream"
     fig2, ax2 = pyplot.subplots()
-    fig2.suptitle('Proportion of peaks in parts of the genes')
+    fig2.suptitle('Proportion of peaks over gene features')
     ax2.axis('equal')
     wedges, texts, autotexts = ax2.pie(all_array2,autopct='%1.1f%%')
     for w in wedges:
@@ -585,7 +585,7 @@ def Dropa_histogram(intergenic_file,All_Anotation_table, Peak_file, name_output,
     bar_list[4].set_facecolor('m')
     bar_list[5].set_facecolor('y')
     bar_list[6].set_facecolor('b')
-    fig1.suptitle('Frequency of peaks in parts of the genes')
+    fig1.suptitle('Frequency of peaks over gene features')
     pyplot.ylabel("Fraction (%)")
     pyplot.legend(bar_list, [labels[0]+"="+str(Quantity_intergenic),labels[1]+"="+ str(TSS_ocurrence),labels[2]+"="+ str(UTR5_ocurrence),labels[3]+"="+ str(Exon_ocurrence),labels[4]+"="+ str(Intron_ocurrence),labels[5]+"="+ str(UTR3_ocurrence) , labels[6]+"="+ str(TTS_ocurrence)] , loc="upper right",bbox_to_anchor=(1.1, 1.11))
     pyplot.xticks(x, labels)
@@ -668,7 +668,7 @@ def Dropa_Enrichment(intergenic_file,All_Anotation_table, number_shuffles, name_
     labels = "Intergenic", "Upstream", "5`UTR", "Exon", "Intron","3`UTR", "Downstream"
     fig1, ax1 = pyplot.subplots()
     fig1.set_size_inches(8, 7)
-    fig1.suptitle('Enrichment over expected of peaks in gene regions')
+    fig1.suptitle('Enrichment over expected of peaks over gene features')
     bar_list= pyplot.bar(x,all_array)
     bar_list[0].set_facecolor('b')
     bar_list[1].set_facecolor('g')
