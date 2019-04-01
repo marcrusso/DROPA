@@ -1,11 +1,11 @@
 
 import argparse
 
-# The program takes as an Input the folder where the genome reference is
+# The program takes as an Input the gene reference folder
 
 ############ INPUT OF VARIABLES ###################
 parser = argparse.ArgumentParser(description='Input program')
-parser.add_argument('namefolder', type=str, help='Folder with the genome reference')
+parser.add_argument('namefolder', type=str, help='GeneReference folder')
 folder = parser.parse_args().namefolder
 
 
