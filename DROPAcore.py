@@ -113,14 +113,14 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
             fields = line.split()
             if len(fields) != 2:
                 print(fields[0])
-                return print('Please input a correct RNA-seq file')
+                return print('Please input a correct expression file')
             try:
                 FPKM = float(fields[1])
                 pass
             except:
                 count_lines +=1
                 if count_lines != 1:
-                    return print('Please input a correct RNA-seq file')
+                    return print('Please input a correct expression file')
                 continue
             trascr_id = fields[0]
 
@@ -264,7 +264,7 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
     #     print('No Unexpress genes with overlapping peaks')
 
     print(' Number of peaks: ' + str(len(peaks_to_transcripts)))
-    print(' There are ' + str(over_over) + ' peaks with overlapping genes and over the FPKM limit \n There are ' + str(under_over) + ' peaks with overlapping genes and under the FPKM limit'
+    print(' There are ' + str(over_over) + ' peaks with overlapping genes and over the FPKM limit \n There are ' + str(under_over) + ' peaks with overlapping genes and under the expression threshold'
               + '\n There are ' + str(
           over_only) + ' peaks with no overlapping genes and over the FPKM limit \n There are ' + str(
           under_only) + ' peaks with no overlapping genes and under the FPKM limit')
