@@ -1,7 +1,7 @@
 
 import argparse
 
-# The program takes as an Input the gene reference folder
+# This program takes as Input the gene reference folder
 
 ############ INPUT OF VARIABLES ###################
 parser = argparse.ArgumentParser(description='Input program')
