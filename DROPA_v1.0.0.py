@@ -54,7 +54,7 @@ try:
     core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
                                       './' + data2 + '/' + data2 + "_Expressed_Annotation.table", "Expressed_" + data2, data2, False)
 except:
-    print('There is no peaks in expressed genes')
+    print('There are no peaks in expressed genes')
     fileOver = "None"
 
 try:
@@ -65,7 +65,7 @@ try:
     core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
                                       './' + data2 + '/' + data2 + "_NotExpressed_Annotation.table", "NotExpressed_" + data2, data2, False)
 except:
-    print('There is no peaks in unexpressed genes')
+    print('There are no peaks in unexpressed genes')
     fileUnder = "None"
 
 #### Make a plot of the total percent of each zone been overlap by a peak for express and not express genes together
@@ -147,7 +147,7 @@ if shuffle != 0:
             finalResultsOver=core.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed')
 
         except:
-            print('There is no peaks in express genes in Shuffle '+ str(x+1))
+            print('There are no peaks in express genes in Shuffle '+ str(x+1))
 
         try:
             resultsFeatureAssignUnder=core.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed')
@@ -155,7 +155,7 @@ if shuffle != 0:
             finalResultsUnder=core.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
         except:
-            print('There is no peaks in unexpress genes in Shuffle ' + str(x+1))
+            print('There are no peaks in unexpress genes in Shuffle ' + str(x+1))
         h, k = 1, 1
         if fileOver != "None":
             if fileUnder != "None":
