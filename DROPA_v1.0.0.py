@@ -9,7 +9,7 @@ import warnings
 import shutil
 warnings.filterwarnings("ignore")
 
-############ INPUT OF VARIABLES ###################
+################### INPUT OF VARIABLES ###################
 
 parser = argparse.ArgumentParser(description='Input program')
 parser.add_argument('namefile', type=str, help='Query BED file')
@@ -17,10 +17,10 @@ parser.add_argument('-ref', type=str, help='Gene Reference Folder')
 parser.add_argument('-o',type=str,help= 'Output directory')
 parser.add_argument('-ex',type=str, help='Expression file. Default is "None"')
 parser.add_argument('-lim',type=float, help='Expression Threshold. Default is 0.5')
-parser.add_argument('-dis',type=int, help='Distance from TSS and TTS, to define Upstream and Downstream regions. Default is 5000')
+parser.add_argument('-dis', help='Distance from TSS and TTS, to define Upstream and Downstream regions. Default is 5000')
 parser.add_argument('-shuffle',type=int , help='Numbers for a shuffle comparison, 0 for none. Default is 0')
 parser.add_argument('-gsize',type=str , help='Genome size file, used for shuffle')
-parser.set_defaults(ex='None',lim=0.5,dis=5000,shuffle=0)
+parser.set_defaults(ex=None,lim=0.5,dis=[5000,5000],shuffle=0)
 
 data=parser.parse_args().namefile
 data2=parser.parse_args().o
@@ -33,59 +33,47 @@ chromosome_size_file = parser.parse_args().gsize
 
 
 ################### BODY OF THE PROGRAM ###################
+
+if ',' in distance:
+    distance = distance.split(',')
+    distance = [int(distance[0]),int(distance[1])]
+elif type(distance) == str:
+    distance = [int(distance), int(distance)]
+
 Utr3 = str(str(annotation) + '/'+'3UTR.bed')
 Utr5 = str(str(annotation) + '/'+'5UTR.bed')
 CDE = str(str(annotation) + '/'+'CDE.bed')
 annotation = str('./' + str(annotation) + '/'+'refgene.bed')
-if limit == None:
-    limit = 0.5
-if shuffle == None:
-    shuffle = 0
 
 gainresults = core.PeakOverlap(annotation,data,tssdistance=distance,peakname=data2)
 
-checkresults=core.CheckExpression(gainresults[0],rnaSeq,limit=limit,peakname=data2,TSSTTSdistance=distance)
+
+checkresults = core.CheckExpression(gainresults[0],rnaSeq,limit=limit,peakname=data2,TSSTTSdistance=distance)
 
 try:
     FeatureAssignOverResults=core.FeatureAssign(checkresults[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2,lap='Expressed_')
-    ExonOverResults= core.TableCreator(FeatureAssignOverResults,namepeak=data2,lap='Expressed')
-    fileOver = "./" + data2 + "/Expressed_" + data2 +".csv"
-    core.Upsetplotting('./' + data2 + '/' + data2 + '_Expressed_Annotation.table',"Expressed_"+data2, data2)
-    core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
-                                      './' + data2 + '/' + data2 + "_Expressed_Annotation.table", "Expressed_" + data2, data2, False)
+    ExonOverResults= core.TableCreator(FeatureAssignOverResults,namepeak=data2,lap='Expressed', peaksingenes= gainresults[0], warnings= True)
+    core.Upsetplotting(ExonOverResults,"Expressed_"+data2, data2)
+    core.Dropa_pie_AllwithIntergenic(gainresults[1],ExonOverResults, "Expressed_" + data2, data2, False)
 except:
     print('There are no peaks overlapping expressed genes')
-    fileOver = "None"
+    ExonOverResults = "None"
 
 try:
     FeatureAssignUnderResults=core.FeatureAssign(checkresults[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2,lap='NotExpressed_')
-    ExonUnderResults=core.TableCreator(FeatureAssignUnderResults,namepeak=data2,lap='NotExpressed')
-    fileUnder = "./" + data2 + "/NotExpressed_" + data2 +".csv"
-    core.Upsetplotting('./' + data2 + '/' + data2 + '_NotExpressed_Annotation.table', 'NotExpressed_'+data2, data2)
-    core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
-                                      './' + data2 + '/' + data2 + "_NotExpressed_Annotation.table", "NotExpressed_" + data2, data2, False)
+    ExonUnderResults=core.TableCreator(FeatureAssignUnderResults,namepeak=data2,lap='NotExpressed', peaksingenes= gainresults[0], warnings= True)
+    core.Upsetplotting(ExonUnderResults, 'NotExpressed_'+data2, data2)
+    core.Dropa_pie_AllwithIntergenic(gainresults[1],ExonUnderResults, "NotExpressed_" + data2, data2, False)
 except:
     print('There are no peaks overlapping unexpressed genes')
-    fileUnder = "None"
+    ExonUnderResults = "None"
 
 #### Make a plot of the total percent of each zone been overlap by a peak for express and not express genes together
 h,k=1,1
-if fileOver != "None":
-    if fileUnder != "None":
-        filenames = [fileOver, fileUnder]
-        filenames2 = ['./' + data2 + '/' + data2 + "_Expressed" + '_Annotation.table',
-                     './' + data2 + '/' + data2 + "_NotExpressed" + '_Annotation.table']
+if ExonOverResults != "None":
+    if ExonUnderResults != "None":
+        filenames = [ExonOverResults, ExonUnderResults]
         with open('./' + data2 + '/' + data2 + '_All_Annotation.table', 'w') as outfile:
-            for fname in filenames2:
-                with open(fname) as infile:
-                    for line in infile:
-                        if h==1:
-                            outfile.write(line)
-                        else:
-                            h=1
-                    h=0
-        with open("./" + data2 + "/All_" + data2 + ".csv", 'w') as outfile:
-            h=1
             for fname in filenames:
                 with open(fname) as infile:
                     for line in infile:
@@ -94,32 +82,19 @@ if fileOver != "None":
                         else:
                             h=1
                     h=0
-
     else:
-        filenames2 = ['./' + data2 + '/' + data2 + "_Expressed" + '_Annotation.table']
+        filenames = ExonOverResults
         with open('./' + data2 + '/' + data2 + '_All_Annotation.table', 'w') as outfile:
-            for fname in filenames2:
-                with open(fname) as infile:
-                    for line in infile:
-                        outfile.write(line)
-        filenames = fileOver
-        with open("./" + data2 + "/All_" + data2 + ".csv", 'w') as outfile:
-                with open(filenames) as infile:
-                    for line in infile:
-                        outfile.write(line)
-
-elif fileUnder != "None":
-    filenames2 = ['./' + data2 + '/' + data2 + "_NotExpressed" + '_Annotation.table']
-    with open('./' + data2 + '/' + data2 + '_All_Annotation.table', 'w') as outfile:
-        for fname in filenames2:
-            with open(fname) as infile:
-                for line in infile:
-                    outfile.write(line)
-    filenames = fileUnder
-    with open("./" + data2 + "/All_" + data2 + ".csv", 'w') as outfile:
             with open(filenames) as infile:
                 for line in infile:
                     outfile.write(line)
+
+elif ExonUnderResults != "None":
+    filenames = ExonUnderResults
+    with open('./' + data2 + '/' + data2 + '_All_Annotation.table', 'w') as outfile:
+        with open(filenames) as infile:
+            for line in infile:
+                outfile.write(line)
 
 core.Upsetplotting('./' + data2 + '/' + data2 + '_All_Annotation.table',"All"+data2, data2)
 
@@ -129,9 +104,11 @@ core.Dropa_pie_AllwithIntergenic('./' + data2 + '/' + data2 + '_intergenic.bed',
 
 core.Dropa_histogram('./' + data2 + '/' + data2 + '_intergenic.bed','./' + data2 + '/' + data2 + "_All_Annotation.table", data, "All_"+data2, data2)
 
-############### MAKE THE COMPARATION WITH SHUFFLE #######################
+################### COMPARISON WITH SHUFFLE ###################
+
 if shuffle != 0:
     for x in range(0, shuffle):
+        finalResultsOver, finalResultsUnder = None, None
         shufflepeaks=core.randpeak(data,x+1,data2,chromosome_size_file)
 
         resultsgain=core.PeakOverlap(annotation,shufflepeaks,tssdistance=distance,peakname=data2+'shuffle'+str(x+1))
@@ -139,12 +116,12 @@ if shuffle != 0:
         if os.stat(resultsgain[0]).st_size == 0:
             print('Shuffle1 has no Intergenic Peaks')
         else:
-            resultscheck=core.CheckExpression(resultsgain[0],rnaSeq,limit=limit,peakname=data2+'shuffle'+str(x+1),TSSTTSdistance=5000)
+            resultscheck=core.CheckExpression(resultsgain[0],rnaSeq,limit=limit,peakname=data2+'shuffle'+str(x+1),TSSTTSdistance=distance)
 
         try:
             resultsFeatureAssignOver=core.FeatureAssign(resultscheck[0],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='Expressed')
 
-            finalResultsOver=core.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed')
+            finalResultsOver=core.TableCreator(resultsFeatureAssignOver,namepeak=data2+'shuffle'+str(x+1),lap='Expressed', peaksingenes= resultsgain[0])
 
         except:
             print('There are no peaks in expressed genes in Shuffle '+ str(x+1))
@@ -152,27 +129,15 @@ if shuffle != 0:
         try:
             resultsFeatureAssignUnder=core.FeatureAssign(resultscheck[1],UTR3=Utr3,UTR5=Utr5,CDE=CDE,peakname=data2+'shuffle'+str(x+1),lap='NotExpressed')
 
-            finalResultsUnder=core.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed')
+            finalResultsUnder=core.TableCreator(resultsFeatureAssignUnder,namepeak=data2+'shuffle'+str(x+1),lap='NotExpressed', peaksingenes=resultsgain[0])
 
         except:
             print('There are no peaks in unexpressed genes in Shuffle ' + str(x+1))
         h, k = 1, 1
-        if fileOver != "None":
-            if fileUnder != "None":
-                filenames = [fileOver, fileUnder]
-                filenames2 = ['./' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + "_Expressed" + '_Annotation.table',
-                              './' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + "_NotExpressed" + '_Annotation.table']
+        if finalResultsOver != None:
+            if finalResultsUnder != None:
+                filenames = [finalResultsOver, finalResultsUnder]
                 with open('./' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + '_All_Annotation.table', 'w') as outfile:
-                    for fname in filenames2:
-                        with open(fname) as infile:
-                            for line in infile:
-                                if h == 1:
-                                    outfile.write(line)
-                                else:
-                                    h = 1
-                            h = 0
-                with open("./" + data2+'shuffle'+str(x+1) + "/All_" + data2+'shuffle'+str(x+1) + ".csv", 'w') as outfile:
-                    h = 1
                     for fname in filenames:
                         with open(fname) as infile:
                             for line in infile:
@@ -183,104 +148,49 @@ if shuffle != 0:
                             h = 0
 
             else:
-                filenames2 = ['./' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + "_Expressed" + '_Annotation.table']
+                filenames = finalResultsOver
                 with open('./' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + '_All_Annotation.table', 'w') as outfile:
-                    for fname in filenames2:
-                        with open(fname) as infile:
-                            for line in infile:
-                                outfile.write(line)
-                filenames = fileOver
-                with open("./" + data2+'shuffle'+str(x+1) + "/All_" + data2+'shuffle'+str(x+1) + ".csv", 'w') as outfile:
                     with open(filenames) as infile:
                         for line in infile:
                             outfile.write(line)
 
-        elif fileUnder != "None":
-            filenames2 = ['./' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + "_NotExpressed" + '_Annotation.table']
+        elif finalResultsUnder != None:
+            filenames = finalResultsUnder
             with open('./' + data2+'shuffle'+str(x+1) + '/' + data2+'shuffle'+str(x+1) + '_All_Annotation.table', 'w') as outfile:
-                for fname in filenames2:
-                    with open(fname) as infile:
-                        for line in infile:
-                            outfile.write(line)
-            filenames = fileUnder
-            with open("./" + data2+'shuffle'+str(x+1) + "/All_" + data2+'shuffle'+str(x+1) + ".csv", 'w') as outfile:
                 with open(filenames) as infile:
                     for line in infile:
                         outfile.write(line)
+
     core.Dropa_Enrichment('./' + data2 + '/' + data2 + '_intergenic.bed', './' + data2 + '/' + data2 + "_All_Annotation.table", shuffle, data2, data2)
+
+################### Erase shuffle folders and excess files ###################
 
     for x in range(1, shuffle+1):
         shutil.rmtree(data2 + 'shuffle' + str(x), ignore_errors=True)
         os.remove(data2 + 'shuffle' + str(x) + ".bed")
 
-my_file = Path("./" + data2 + "/" + data2 +"Genes")
-if my_file.is_file():
-    os.remove("./" + data2 + "/" + data2 +"Genes")
-
 my_file = Path("./" + data2 + "/" + data2 +"PeaksinGenes")
 if my_file.is_file():
-    os.remove("./" + data2 + "/" + data2 +"PeaksinGenes")
-
-my_file = Path("./" + data2 + "/" + data2 + "Intergenic.png")
-if my_file.is_file():
-    os.remove("./" + data2 + "/" + data2 + "Intergenic.png")
-
-my_file = Path("./" + data2 + "/infoGenes" + data2)
-if my_file.is_file():
-    os.remove("./" + data2 + "/infoGenes" + data2)
-
-my_file = Path("./" + data2 + "/infoRepeatsExpressed" + data2 + ".csv")
-if my_file.is_file():
-    os.remove("./" + data2 + "/infoRepeatsExpressed" + data2 + ".csv")
-
-my_file = Path("./" + data2 + "/infoRepeatsNotExpressed" + data2 + ".csv")
-if my_file.is_file():
-    os.remove("./" + data2 + "/infoRepeatsNotExpressed" + data2 + ".csv")
+    os.remove(my_file)
 
 my_file = Path("./" + data2 + "/Expressed_" + data2 + "exon")
 if my_file.is_file():
-    os.remove("./" + data2 + "/Expressed_" + data2 + "exon")
+    os.remove(my_file)
 
 my_file = Path("./" + data2 + "/NotExpressed_" + data2 + "exon")
 if my_file.is_file():
-    os.remove("./" + data2 + "/NotExpressed_" + data2 + "exon")
-
-my_file = Path("./" + data2 + "/SameOverlapping" + data2)
-if my_file.is_file():
-    os.remove("./" + data2 + "/SameOverlapping" + data2)
-
-my_file = Path("./" + data2 + "/Expressed_" + data2 + "tableFoldChange")
-if my_file.is_file():
-    os.remove("./" + data2 + "/Expressed_" + data2 + "tableFoldChange")
-
-my_file = Path("./" + data2 + "/NotExpressed_" + data2 + "tableFoldChange")
-if my_file.is_file():
-    os.remove("./" + data2 + "/NotExpressed_" + data2 + "tableFoldChange")
+    os.remove(my_file)
 
 my_file = Path("./" + data2 + "/All_" + data2 + ".csv")
 if my_file.is_file():
-    os.remove("./" + data2 + "/All_" + data2 + ".csv")
+    os.remove(my_file)
 
 my_file = Path("./" + data2 + "/NotExpressed_" + data2)
 if my_file.is_file():
-    os.remove("./" + data2 + "/NotExpressed_" + data2)
+    os.remove(my_file)
 
 my_file = Path("./" + data2 + "/Expressed_" + data2)
 if my_file.is_file():
-    os.remove("./" + data2 + "/Expressed_" + data2)
+    os.remove(my_file)
 
-my_file = Path("./" + data2 + "/NotExpressed_" + data2+ ".csv")
-if my_file.is_file():
-    os.remove("./" + data2 + "/NotExpressed_" + data2+ ".csv")
-
-my_file = Path("./" + data2 + "/Expressed_" + data2+ ".csv")
-if my_file.is_file():
-    os.remove("./" + data2 + "/Expressed_" + data2+ ".csv")
-
-my_file = Path("./" + data2 + "/Expressed_" + data2+ "Intergenic.pdf")
-if my_file.is_file():
-    os.remove("./" + data2 + "/Expressed_" + data2+ "Intergenic.pdf")
-
-my_file = Path("./" + data2 + "/NotExpressed_" + data2+ "Intergenic.pdf")
-if my_file.is_file():
-    os.remove("./" + data2 + "/NotExpressed_" + data2+ "Intergenic.pdf")
+################### -~- ###################

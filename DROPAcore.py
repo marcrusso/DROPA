@@ -5,15 +5,13 @@ import numpy as np
 from tqdm import tqdm
 import pandas as pd
 import time
-from collections import Counter
-import csv
 from upsetplot import plot
 from matplotlib import pyplot
-### INTERVALTREE ONLY WORKS ON PYTHON 3.5 OR MINOR VERSION
+from scipy import stats
 
 from intervaltree import IntervalTree
 
-def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
+def PeakOverlap(genesfile, peaksfile,tssdistance=[0,0],peakname='null'):
     LuckPeak, LuckGen, LuckTree, LuckBegin , Genlist = {},{},{},{},{}
 
 ####### CREATE A INTERVALTREE VARIABLE
@@ -41,12 +39,11 @@ def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
                         continue
                     else:
                         nameid = fields2[3]
-                        begingen = int(fields2[1]) - tssdistance
-                        endgen = int(fields2[2]) + tssdistance
+                        begingen = int(fields2[1]) - tssdistance[0]
+                        endgen = int(fields2[2]) + tssdistance[1]
                         chromogen = fields2[0]
                         strand = fields2[5]
                         if tree.overlap(begingen, endgen) != set():
-                            Genlist[nameid] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand]
                             for x in tree.overlap(begingen, endgen):
                                 LuckGen[m] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand] + LuckBegin[x.begin]
                                 intergenic = intergenic - set([LuckBegin[x.begin][0]])
@@ -67,12 +64,11 @@ def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
             continue
         else:
             nameid = fields2[3]
-            begingen = int(fields2[1]) - tssdistance
-            endgen = int(fields2[2]) + tssdistance
+            begingen = int(fields2[1]) - tssdistance[0]
+            endgen = int(fields2[2]) + tssdistance[1]
             chromogen = fields2[0]
             strand = fields2[5]
             if tree.overlap(begingen, endgen) != set():
-                Genlist[nameid] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand]
                 for x in tree.overlap(begingen, endgen):
                     LuckGen[m] = [chromogen] + [fields2[1]] + [fields2[2]] + [nameid] + [strand] + LuckBegin[x.begin]
                     intergenic = intergenic - set([LuckBegin[x.begin][0]])
@@ -93,19 +89,19 @@ def PeakOverlap(genesfile, peaksfile,tssdistance=0,peakname='null'):
         results_intragenic.to_csv('./' + peakname + '/' + peakname + '_intergenic.bed', index=None, sep='\t', header=False)
 
     results = pd.DataFrame(list(LuckGen.values()))
-    results_genes = pd.DataFrame(list(Genlist.values())).sort_values(by=0)
     results.to_csv('./' + peakname + '/' + peakname + 'PeaksInGenes', index=None, sep='\t', header= False)
-    results_genes.to_csv('./' + peakname + '/' + peakname + 'Genes', index=None, sep='\t', header=False)
-    return ('./' + peakname + '/' + peakname + 'PeaksInGenes', './' + peakname + '/' + peakname + 'Genes',
+    return ('./' + peakname + '/' + peakname + 'PeaksInGenes',
             './' + peakname + '/' + peakname + '_intergenic.bed')
 
+def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdistance=[0,0]):
 
-def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdistance=0):
+    overlap_expres_trans, peak_overlap_trans = [], []
     # LOAD THE TRANSCRIPT/GENES DATA
     tic = time.clock()
     transcript_info = {}
     count_lines = 0
     print('Checking Transcripts/genes overlapped by peaks and selecting the best match')
+
     if transcribe != None:
         if os.stat(transcribe).st_size == 0:
             return print('Expression file is empty')
@@ -123,20 +119,19 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
                     return print('Please input a correct expression file')
                 continue
             trascr_id = fields[0]
-
             transcript_info[trascr_id] = [FPKM]
     else:
         for line in open(peakgenes, "r"):
             fields = line.split()
             FPKM = float(0)
             trascr_id = fields[3]
-
             transcript_info[trascr_id] = [FPKM]
 
     # LOAD THE PEAK-IN-GENE DATA
     transcr_id_not_found = 0
     peaks_to_transcripts = {}
     total = 0
+
     for line in open(peakgenes, "r"):
         total += 1
         chrom, transcr_start, transcr_end, transcr_id, strand, peak_name, peak_start, peak_end = line.split()
@@ -148,11 +143,9 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
             continue
 
         transcript_data = transcript_info[transcr_id]
-        peaks_to_transcripts[peak_name].append(
-            transcript_data + [chrom, transcr_start, transcr_end, transcr_id, strand, peak_start, peak_end])
-    print('Files Loaded')
+        peaks_to_transcripts[peak_name].append(transcript_data + [chrom, transcr_start, transcr_end, transcr_id, strand, peak_start, peak_end])
 
-###### SELECT TRANSCRIPTS OR GENES BY EXPRESION. ALL MAX IN THE BEST_TRANSCRIPT, IF THERE IS NO MAX (FPKM = 0): SAVE IT IN NOMAX, MORE THAN 1 MAX: SAVE IN PEAK2MAX.
+    print('Files Loaded')
     best_transcript_under = {}
     best_transcript_over = {}
     nobest_transcript = {}
@@ -160,6 +153,7 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
     over_only = 0
     under_over = 0
     under_only = 0
+
     for peak in peaks_to_transcripts:
         transcripts = peaks_to_transcripts[peak]
         fpkm = [x[0] for x in transcripts]
@@ -172,8 +166,8 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
             for x in transcripts:
                 beginpeak = int(x[6])
                 endpeak = int(x[7])
-                begingen = int(x[2]) - TSSTTSdistance
-                endgen = int(x[3]) + TSSTTSdistance
+                begingen = int(x[2]) - TSSTTSdistance[0]
+                endgen = int(x[3]) + TSSTTSdistance[1]
                 if beginpeak in range(begingen, endgen) and endpeak not in range(begingen, endgen):
                     overlapbases.append(endgen - beginpeak)
                 elif beginpeak in range(begingen, endgen) and endpeak in range(begingen, endgen):
@@ -190,17 +184,21 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
                         nobest_transcript[peak] = [transcripts[y][5]]
                     else:
                         nobest_transcript[peak] = nobest_transcript[peak] + [transcripts[y][5]]
-        ### SEE IF THERE IS MORE THAN 1 MAX AND SELECT THAT IT HAS MORE OVERLAPPING BASES
+        ### IF THERE IS MORE THAN 1 MAX, SELECT THE ONE THAT HAS MORE OVERLAPPING BASES
         elif len(indices) > 1:
+            ## SAVE TRANSCRIPTS THAT ARE EXPRESSED (OVER FPKM)
             overlapbases = []
             aux_trans = [0 for x in range(len(indices))]
             n=0
+            peak_overlap_trans.append(peak)
+            overlap_expres_trans = []
             for x in indices:
+                overlap_expres_trans = overlap_expres_trans + [transcripts[x]]
                 aux_trans[n] = transcripts[x]
                 beginpeak = int(aux_trans[n][6])
                 endpeak = int(aux_trans[n][7])
-                begingen = int(aux_trans[n][2]) - TSSTTSdistance
-                endgen = int(aux_trans[n][3]) + TSSTTSdistance
+                begingen = int(aux_trans[n][2]) - TSSTTSdistance[0]
+                endgen = int(aux_trans[n][3]) + TSSTTSdistance[1]
                 if beginpeak in range(begingen, endgen) and endpeak not in range(begingen, endgen):
                     overlapbases.append(endgen - beginpeak)
                 elif beginpeak in range(begingen, endgen) and endpeak in range(begingen, endgen):
@@ -236,11 +234,6 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
 
 
     ### ORDER THE RESULTS FOR OUTPUT AND SAVE THEM IN A FILE
-    if len(nobest_transcript) > 0:
-        print('There are '+ str(len(nobest_transcript)) + ' peaks overlapping 2 or more genes/transcript with overlapping bases and no difference in expression level')
-        w = csv.writer(open('./' + peakname + '/SameOverlapping' + peakname, "w"))
-        for key, val in nobest_transcript.items():
-            w.writerow([key, val])
 
     if len(best_transcript_under) > 0:
         best_transcript_under = pd.DataFrame(best_transcript_under).transpose()
@@ -248,9 +241,6 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
         best_transcript_under.columns=['FPKM','Chromo', 'Gen_Start','Gen_End','Gen_TransID','Strand','Peak_Start','Peak_End','Peak_Name']
         best_transcript_under = best_transcript_under[['Chromo','Gen_Start','Gen_End','Gen_TransID','Strand','Peak_Name','Peak_Start','Peak_End','FPKM']]
         best_transcript_under.to_csv('./' + peakname + '/NotExpressed_' + peakname, index=None, sep='\t')
-
-    # else:
-    #     print('No express genes with overlapping peaks')
 
     if len(best_transcript_over) > 0:
         best_transcript_over = pd.DataFrame(best_transcript_over).transpose()
@@ -260,26 +250,22 @@ def CheckExpression(peakgenes, transcribe, limit=0.5,peakname='null',TSSTTSdista
         best_transcript_over = best_transcript_over[
             ['Chromo', 'Gen_Start', 'Gen_End', 'Gen_TransID', 'Strand', 'Peak_Name', 'Peak_Start', 'Peak_End', 'FPKM']]
         best_transcript_over.to_csv('./' + peakname + '/Expressed_' + peakname, index=None, sep='\t')
-    # else:
-    #     print('No Unexpress genes with overlapping peaks')
 
     print(' Number of peaks: ' + str(len(peaks_to_transcripts)))
     print(' There are ' + str(over_over) + ' peaks with overlapping genes and over the expression threshold \n There are ' + str(under_over) + ' peaks with overlapping genes and under the expression threshold'
               + '\n There are ' + str(
           over_only) + ' peaks with no overlapping genes and over the expression threshold \n There are ' + str(
           under_only) + ' peaks with no overlapping genes and under the expression threshold')
-    results = open('./' + peakname + '/infoGenes' + peakname, 'w')
-    results.write(' Number of peaks: ' + str(len(peaks_to_transcripts)) +'\n'+' There are '+str(over_over)+' peaks with overlapping genes and over the expression threshold \n There are '+str(under_over)+ ' peaks with overlapping genes and under the expression threshold'
-        +'\n There are '+str(over_only)+' peaks with no overlapping genes and over the expression threshold \n There are '+str(under_only)+' peaks with no overlapping genes and under the expression threshold')
 
     print('Total peaks overlapping transcripts/genes: ' + str(over_over+over_only+under_over+under_only))
 
     return ('./' + peakname + '/Expressed_' + peakname, './' + peakname + '/NotExpressed_' + peakname)
 
 
-def TableCreator(peakexon,namepeak='null',lap='null'):
-    exonchromo,exonbegin, exonend, exonname,exondirection,exontype,peakname,peakchromo,peakbegin, peakend,begingen, endgen=[[],[],[],[],[],[],[],[],[],[],[],[]]
-    score=[]
+def TableCreator(peakexon,namepeak='null',lap='null',peaksingenes = 'null', warnings = False):
+    exonchromo,exonbegin, exonend, trans_name,exondirection,exontype,peakname,peakchromo,peakbegin, peakend,begingen, endgen=[[],[],[],[],[],[],[],[],[],[],[],[]]
+    score, upstream_warning_peak, upstream_warning_tran, upstream_warning_chrom, upstream_warning_peak_start, upstream_warning_peak_end, upstream_warning_FPKM, upstream_warning_direction = [],[],[],[],[],[],[],[]
+    downstream_warning_peak, downstream_warning_tran, downstream_warning_chrom, downstream_warning_peak_start, downstream_warning_peak_end, downstream_warning_FPKM, downstream_warning_direction =  [],[],[],[],[],[],[]
     data=open(peakexon)
     a=1
     for lines in data.readlines():
@@ -287,7 +273,7 @@ def TableCreator(peakexon,namepeak='null',lap='null'):
             exonchromo.append(lines.split('\t')[0])
             exonbegin.append(int(lines.split('\t')[9]))
             exonend.append(int(lines.split('\t')[10]))
-            exonname.append(lines.split('\t')[3])
+            trans_name.append(lines.split('\t')[3])
             peakend.append(int(lines.split('\t')[7]))
             peakbegin.append(int(lines.split('\t')[6]))
             exondirection.append(lines.split('\t')[4])
@@ -306,16 +292,15 @@ def TableCreator(peakexon,namepeak='null',lap='null'):
     score=np.array(score)
     matrixlong=-1
     resnamegen, reschromo, resdirection,respeakstart,respeakends,respeakname =[[],[],[],[],[],[]]
-    exonname,exontype = np.array(exonname),np.array(exontype)
+    TTSwarning, TSSwarning = [],[]
+    trans_name,exontype = np.array(trans_name),np.array(exontype)
     peakname, exonchromo = [np.array(peakname), np.array(exonchromo)]
     resscore=[]
-    repeattimes=[]
     uniquepeak=np.unique(peakname)
     for peak in tqdm(range(len(uniquepeak)), desc='TableCreator'):
         indices = np.where(peakname==uniquepeak[peak])
-        countrep = -1
         reschromo.append(exonchromo[indices][0])
-        resnamegen.append(exonname[indices][0])
+        resnamegen.append(trans_name[indices][0])
         resdirection.append(exondirection[indices][0])
         respeakstart.append(peakbegin[indices][0])
         respeakends.append(peakend[indices][0])
@@ -328,52 +313,116 @@ def TableCreator(peakexon,namepeak='null',lap='null'):
         countpeakintrons.append(0)
         countpeakTSS.append(0)
         countpeakTTS.append(0)
-        for indice in range(len(exonname[indices])):
+        for indice in range(len(trans_name[indices])):
             if ((peakbegin[indices][indice] <= begingen[indices][indice] and exondirection[indices][indice] == '+') or (
                     peakend[indices][indice] >= endgen[indices][indice] and exondirection[indices][indice] == '-'))and countpeakTSS[matrixlong] != 1:
                 countpeakTSS[matrixlong] = 1
-                countrep += 1
             if ((peakbegin[indices][indice] <= begingen[indices][indice] and exondirection[indices][indice] == '-') or (
                     peakend[indices][indice] >= endgen[indices][indice] and exondirection[indices][indice] == '+')) and countpeakTTS[matrixlong] != 1:
                 countpeakTTS[matrixlong] = 1
-                countrep += 1
 
             if (exonbegin[indices][indice] <= peakbegin[indices][indice] <= exonend[indices][indice] or exonbegin[indices][indice] <= peakend[indices][indice] <= exonend[indices][indice] or (
                     exonbegin[indices][indice] >= peakbegin[indices][indice] and peakend[indices][indice] >= exonend[indices][indice])):
                 if exontype[indices][indice]=='5UTR' and countpeak5UTR[matrixlong] != 1:
                     countpeak5UTR[matrixlong] = 1
-                    countrep += 1
                 elif exontype[indices][indice]=='3UTR' and countpeak3UTR[matrixlong] != 1:
                     countpeak3UTR[matrixlong] = 1
-                    countrep += 1
                 elif countpeakexons[matrixlong] != 1:
                     countpeakexons[matrixlong] = 1
-                    countrep += 1
             try:
                 if ((exonend[indices][indice] <= peakbegin[indices][indice] <= exonbegin[indices][indice+1] or exonend[indices][indice] <= peakend[indices][indice] <= exonbegin[indices][indice+1] or (exonend[indices][indice] >= peakbegin[indices][indice] and peakend[indices][indice] >= exonbegin[indices][indice]))) and countpeakintrons[matrixlong] != 1:
                     countpeakintrons[matrixlong] = 1
-                    countrep += 1
             except:
                 pass
-        repeattimes.append(countrep)
-    repeatcounter = Counter(repeattimes)
+            if countpeakintrons[matrixlong] == 0 and countpeak5UTR[matrixlong] == 0 and countpeak3UTR[matrixlong] == 0 and countpeakexons[matrixlong] == 0 and countpeakTSS[matrixlong] == 0 and countpeakTTS[matrixlong] == 0:
+                countpeakintrons[matrixlong] = 1
+        if countpeakexons[matrixlong] == 0 and countpeakintrons[matrixlong] == 0 and countpeak3UTR[matrixlong] == 0 and countpeak5UTR[matrixlong] == 0:
+            if countpeakTSS[matrixlong] == 1:
+                upstream_warning_peak.append(uniquepeak[peak])
+                upstream_warning_tran.append(trans_name[indices][0])
+                upstream_warning_chrom.append(exonchromo[indices][0])
+                upstream_warning_direction.append(exondirection[indices][0])
+                upstream_warning_FPKM.append(score[indices][0])
+                upstream_warning_peak_end.append(peakbegin[indices][0])
+                upstream_warning_peak_start.append(peakend[indices][0])
+                TSSwarning.append(True)
+                TTSwarning.append(False)
+
+            elif countpeakTTS[matrixlong] == 1:
+                downstream_warning_peak.append(uniquepeak[peak])
+                downstream_warning_tran.append(trans_name[indices][0])
+                downstream_warning_chrom.append(exonchromo[indices][0])
+                downstream_warning_direction.append(exondirection[indices][0])
+                downstream_warning_FPKM.append(score[indices][0])
+                downstream_warning_peak_end.append(peakbegin[indices][0])
+                downstream_warning_peak_start.append(peakend[indices][0])
+                TTSwarning.append(True)
+                TSSwarning.append(False)
+            else:
+                TTSwarning.append(False)
+                TSSwarning.append(False)
+        else:
+            TTSwarning.append(False)
+            TSSwarning.append(False)
+
+    ##### Look peaks with antisense transcripts #####
+
+    peaks_dir, peaks_inv_dir, peaks_inv_tran, peaks_tran = {},{},{},{}
+    for lines in open(peaksingenes):
+        fields = lines.split()
+        if fields[5] in peaks_tran.keys():
+            if fields[4] not in peaks_dir[fields[5]]:
+                peaks_tran.update({fields[5]: peaks_tran[fields[5]]+[fields[3]]})
+                peaks_dir.update({fields[5]: peaks_dir[fields[5]]+[fields[4]]})
+                peaks_inv_tran[fields[5]] = peaks_tran[fields[5]]
+                peaks_inv_dir[fields[5]] = peaks_dir[fields[5]]
+            else:
+                peaks_tran.update({fields[5]: peaks_tran[fields[5]]+[fields[3]]})
+                peaks_dir.update({fields[5]: peaks_dir[fields[5]]+[fields[4]]})
+        else:
+            peaks_dir.update({fields[5]: [fields[4]]})
+            peaks_tran.update({fields[5]: [fields[3]]})
+    antisense_warning = []
+    for peak in respeakname:
+        if peak in peaks_inv_tran.keys():
+            antisense_warning.append('True')
+        else:
+            antisense_warning.append('False')
+
+    ###### -~- ######
+
     if not os.path.exists(namepeak):
         os.makedirs(namepeak)
-    results=open('./'+namepeak+'/'+namepeak+"_"+lap+'_Annotation.table','w')
-    results.write('Chromo'+'\t'+'Peak_Start'+'\t'+'Peak_End'+'\t'+'Peak_Name'+'\t'+'ID_transc'+'\t'+'FPKM'+'\t'+'Direction'+'\t'+'TSS'+'\t'+'5UTR'+'\t'+'Exons'+'\t'+'Introns'+'\t'+'3UTR'+'\t'+'TTS'+'\t'+'\n')
-    for res in range(len(resnamegen)):
-        results.write(reschromo[res]+'\t'+str(respeakstart[res])+'\t'+str(respeakends[res])+'\t'+respeakname[res]+'\t'+resnamegen[res]+'\t'+str(resscore[res])+'\t'+resdirection[res]+'\t'+str(countpeakTSS[res])+'\t'+str(countpeak5UTR[res])+'\t'+str(countpeakexons[res])+'\t'+str(countpeakintrons[res])+'\t'+str(countpeak3UTR[res])+'\t'+str(countpeakTTS[res])+'\t'+'\n')
-    results.close()
-    results=open('./'+namepeak+'/'+lap+"_"+namepeak+'.csv','w')
-    results.write('\"'+'Peak_Name'+'\t'+'Upstream'+'\t'+'UTR5'+'\t'+'Exons'+'\t'+'Introns'+'\t'+'UTR3'+'\t'+'Downstream'+'\t'+'\"'+','+','+'\n')
-    for res in range(len(resnamegen)):
-        results.write('\"'+respeakname[res]+'\t'+str(countpeakTSS[res])+'\t'+str(countpeak5UTR[res])+'\t'+str(countpeakexons[res])+'\t'+str(countpeakintrons[res])+'\t'+str(countpeak3UTR[res])+'\t'+str(countpeakTTS[res])+'\t'+'\"'+','+','+'\n')
-    results.close()
-    w = csv.writer(open('./'+namepeak+'/infoRepeats'+lap+namepeak+'.csv', "w"))
-    for key, val in repeatcounter.items():
-        w.writerow([key, val])
 
-    return('./'+namepeak+'/'+lap+namepeak+'.csv','./'+namepeak+'/'+namepeak+"_"+lap+'_Annotation.table')
+    ##### Create the files with the Upstream and Downstream warnings ######
+    if warnings == True:
+        results=open('./'+namepeak+'/'+namepeak+'_Upstream_Warnings','w')
+        results.write('Chromo'+'\t'+'Peak_Start'+'\t'+'Peak_End'+'\t'+'Peak_Name'+'\t'+'ID_transc'+'\t'+'FPKM'+'\t'+'Direction'+'\n')
+        for x in range(len(upstream_warning_peak)):
+            results.write(upstream_warning_chrom[x] + '\t' + str(upstream_warning_peak_start[x]) + '\t' + str(upstream_warning_peak_end[x]) +'\t' + str(upstream_warning_peak[x]) +'\t' + upstream_warning_tran[x] +'\t' + str(upstream_warning_FPKM[x]) +'\t' + upstream_warning_direction[x] + "\n")
+        results.close()
+
+        results=open('./'+namepeak+'/'+namepeak+'_Downstream_Warnings','w')
+        results.write('Chromo'+'\t'+'Peak_Start'+'\t'+'Peak_End'+'\t'+'Peak_Name'+'\t'+'ID_transc'+'\t'+'FPKM'+'\t'+'Direction'+'\n')
+        for x in range(len(downstream_warning_peak)):
+            results.write(downstream_warning_chrom[x] + '\t' + str(downstream_warning_peak_start[x]) + '\t' + str(downstream_warning_peak_end[x]) +'\t' + downstream_warning_peak[x] +'\t' + downstream_warning_tran[x] +'\t' + str(downstream_warning_FPKM[x]) +'\t' + downstream_warning_direction[x] + "\n")
+        results.close()
+
+        results=open('./'+namepeak+'/'+namepeak+'_Antisense_Warnings','w')
+        results.write('Peak'+'\t'+'transcripts' + '\t' + 'Strand' + '\n')
+        for x in peaks_inv_tran.keys():
+            results.write(x + '\t' + str(peaks_tran[x])[1:-1][0:] + "\t" + str(peaks_dir[x])[1:-1][0:] + "\n")
+        results.close()
+
+    ##### -~- #####
+
+    results=open('./'+namepeak+'/'+namepeak+"_"+lap+'_Annotation.table','w')
+    results.write('Chromo'+'\t'+'Peak_Start'+'\t'+'Peak_End'+'\t'+'Peak_Name'+'\t'+'ID_transc'+'\t'+'FPKM'+'\t'+'Direction'+'\t'+'TSS'+'\t'+'5UTR'+'\t'+'Exons'+'\t'+'Introns'+'\t'+'3UTR'+'\t'+'TTS'+'\t'+'Warning_Upstream'+'\t'+'Warning_downstream'+'\t'+'Warning_Antisense'+'\t'+'\n')
+    for res in range(len(resnamegen)):
+        results.write(reschromo[res]+'\t'+str(respeakstart[res])+'\t'+str(respeakends[res])+'\t'+respeakname[res]+'\t'+resnamegen[res]+'\t'+str(resscore[res])+'\t'+resdirection[res]+'\t'+str(countpeakTSS[res])+'\t'+str(countpeak5UTR[res])+'\t'+str(countpeakexons[res])+'\t'+str(countpeakintrons[res])+'\t'+str(countpeak3UTR[res])+'\t'+str(countpeakTTS[res])+'\t'+str(TSSwarning[res])+'\t'+str(TTSwarning[res])+'\t'+str(antisense_warning[res])+'\t'+'\n')
+    results.close()
+
+    return('./'+namepeak+'/'+namepeak+"_"+lap+'_Annotation.table')
 
 # This program take the list of exons that are in the genes and put them in a new list where the each row is a exon with the name of the file
 # Need a bed file and for the 2 inputs, been one the list of the genes with the exons size and position and the other the clean list of gain or lost genes.
@@ -623,8 +672,8 @@ def Dropa_Enrichment(intergenic_file,All_Anotation_table, number_shuffles, name_
     Original_UTR3_ocurrence = UTR3_peaks.count("1")
     Original_TTS_ocurrence = TTS_peaks.count("1")
 
-    shuffle_quantity_intergenic, shuffle_TSS_ocurrence, shuffle_UTR5_ocurrence, shuffle_Exon_ocurrence, shuffle_Intron_ocurrence, shuffle_UTR3_ocurrence, shuffle_TTS_ocurrence = [],[],[],[],[],[],[]
-
+    enrichment_intergenic_ocurrence, enrichment_TSS_ocurrence, enrichment_UTR5_ocurrence, enrichment_Exon_ocurrence, enrichment_Intron_ocurrence, enrichment_UTR3_ocurrence, enrichment_TTS_ocurrence = [],[],[],[],[],[],[]
+    shuffle_TSS,shuffle_UTR5,shuffle_Exon,shuffle_Intron,shuffle_UTR3,shuffle_TTS,shuffle_intergenic = [], [], [], [], [], [], []
     for x in range(1,number_shuffles+1):
         TSS_peaks, UTR5_peaks, Exon_peaks, Intron_peaks, TTS_peaks, UTR3_peaks, intergenic_peaks = [], [], [], [], [], [], []
         data = open(name_output+"shuffle"+str(x)+"/"+name_output+"shuffle"+str(x)+"_All_Annotation.table")
@@ -636,40 +685,99 @@ def Dropa_Enrichment(intergenic_file,All_Anotation_table, number_shuffles, name_
             UTR3_peaks.append(lines.split('\t')[11])
             TTS_peaks.append(lines.split('\t')[12])
 
-        shuffle_TSS_ocurrence.append(TSS_peaks.count("1"))
-        shuffle_UTR5_ocurrence.append(UTR5_peaks.count("1"))
-        shuffle_Exon_ocurrence.append(Exon_peaks.count("1"))
-        shuffle_Intron_ocurrence.append(Intron_peaks.count("1"))
-        shuffle_UTR3_ocurrence.append(UTR3_peaks.count("1"))
-        shuffle_TTS_ocurrence.append(TTS_peaks.count("1"))
+        shuffle_TSS_ocurrence = TSS_peaks.count("1")
+        shuffle_UTR5_ocurrence = UTR5_peaks.count("1")
+        shuffle_Exon_ocurrence = Exon_peaks.count("1")
+        shuffle_Intron_ocurrence = Intron_peaks.count("1")
+        shuffle_UTR3_ocurrence = UTR3_peaks.count("1")
+        shuffle_TTS_ocurrence = TTS_peaks.count("1")
         data = open(name_output+"shuffle"+str(x)+"/"+name_output+"shuffle"+str(x)+"_intergenic.bed")
         for lines in data.readlines():
             intergenic_peaks.append(lines.split('\t')[3])
-        shuffle_quantity_intergenic.append(len(intergenic_peaks))
+        shuffle_quantity_intergenic = len(intergenic_peaks)
+        Total_peaks = shuffle_quantity_intergenic + len(TTS_peaks)
 
-    average_TSS_ocurrence = sum(shuffle_TSS_ocurrence)/len(shuffle_TSS_ocurrence)
-    average_UTR5_ocurrence = sum(shuffle_UTR5_ocurrence)/len(shuffle_UTR5_ocurrence)
-    average_Exon_ocurrence = sum(shuffle_Exon_ocurrence)/len(shuffle_Exon_ocurrence)
-    average_Intron_ocurrence = sum(shuffle_Intron_ocurrence)/len(shuffle_Intron_ocurrence)
-    average_UTR3_ocurrence = sum(shuffle_UTR3_ocurrence)/len(shuffle_UTR3_ocurrence)
-    average_TTS_ocurrence = sum(shuffle_TTS_ocurrence)/len(shuffle_TTS_ocurrence)
-    average_quantity_intergenic = sum(shuffle_quantity_intergenic)/len(shuffle_quantity_intergenic)
+        enrichment_TSS_ocurrence.append(Original_TSS_ocurrence / shuffle_TSS_ocurrence)
+        enrichment_UTR5_ocurrence.append(Original_UTR5_ocurrence / shuffle_UTR5_ocurrence)
+        enrichment_Exon_ocurrence.append(Original_Exon_ocurrence / shuffle_Exon_ocurrence)
+        enrichment_Intron_ocurrence.append(Original_Intron_ocurrence / shuffle_Intron_ocurrence)
+        enrichment_UTR3_ocurrence.append(Original_UTR3_ocurrence / shuffle_UTR3_ocurrence)
+        enrichment_TTS_ocurrence.append(Original_TTS_ocurrence / shuffle_TTS_ocurrence)
+        enrichment_intergenic_ocurrence.append(Quantity_intergenic / shuffle_quantity_intergenic)
 
-    enrichment_TSS_ocurrence = round(Original_TSS_ocurrence /average_TSS_ocurrence, 2)
-    enrichment_UTR5_ocurrence = round(Original_UTR5_ocurrence /average_UTR5_ocurrence, 2)
-    enrichment_Exon_ocurrence = round(Original_Exon_ocurrence / average_Exon_ocurrence, 2)
-    enrichment_Intron_ocurrence = round(Original_Intron_ocurrence / average_Intron_ocurrence, 2)
-    enrichment_UTR3_ocurrence = round(Original_UTR3_ocurrence / average_UTR3_ocurrence, 2)
-    enrichment_TTS_ocurrence = round(Original_TTS_ocurrence / average_TTS_ocurrence, 2)
-    enrichment_intergenic_ocurrence = round(Quantity_intergenic / average_quantity_intergenic, 2)
+        shuffle_TSS.append(shuffle_TSS_ocurrence)
+        shuffle_UTR5.append(shuffle_TSS_ocurrence)
+        shuffle_Exon.append(shuffle_TSS_ocurrence)
+        shuffle_Intron.append(shuffle_TSS_ocurrence)
+        shuffle_UTR3.append(shuffle_TSS_ocurrence)
+        shuffle_TTS.append(shuffle_TSS_ocurrence)
+        shuffle_intergenic.append(shuffle_TSS_ocurrence)
+
+    average_shuffle_TSS = np.mean(shuffle_TSS)
+    average_shuffle_UTR5 = np.mean(shuffle_UTR5)
+    average_shuffle_Exon = np.mean(shuffle_Exon)
+    average_shuffle_Intron = np.mean(shuffle_Intron)
+    average_shuffle_UTR3 = np.mean(shuffle_UTR3)
+    average_shuffle_TTS = np.mean(shuffle_TTS)
+    average_shuffle_intergenic = np.mean(shuffle_intergenic)
+
+    average_enrichment_TSS = round(sum(enrichment_TSS_ocurrence)/len(enrichment_TSS_ocurrence), 2)
+    average_enrichment_UTR5 = round(sum(enrichment_UTR5_ocurrence)/len(enrichment_UTR5_ocurrence), 2)
+    average_enrichment_Exon = round(sum(enrichment_Exon_ocurrence)/len(enrichment_Exon_ocurrence), 2)
+    average_enrichment_Intron = round(sum(enrichment_Intron_ocurrence)/len(enrichment_Intron_ocurrence), 2)
+    average_enrichment_UTR3 = round(sum(enrichment_UTR3_ocurrence)/len(enrichment_UTR3_ocurrence), 2)
+    average_enrichment_TTS = round(sum(enrichment_TTS_ocurrence)/len(enrichment_TTS_ocurrence), 2)
+    average_enrichment_intergenic = round(sum(enrichment_intergenic_ocurrence)/len(enrichment_intergenic_ocurrence), 2)
+
+    no_TSS_shuffle = int(Total_peaks - average_shuffle_TSS)
+    no_UTR5_shuffle = int(Total_peaks - average_shuffle_UTR5)
+    no_Exon_shuffle = int(Total_peaks - average_shuffle_Exon)
+    no_Intron_shuffle = int(Total_peaks - average_shuffle_Intron)
+    no_UTR3_shuffle = int(Total_peaks - average_shuffle_UTR3)
+    no_TTS_shuffle = int(Total_peaks - average_shuffle_TTS)
+    no_intergenic_shuffle = int(Total_peaks - average_shuffle_intergenic)
+
+    no_TSS_Original= Total_peaks - Original_TSS_ocurrence
+    no_UTR5_Original = Total_peaks - Original_UTR5_ocurrence
+    no_Exon_Original = Total_peaks - Original_Exon_ocurrence
+    no_Intron_Original = Total_peaks - Original_Intron_ocurrence
+    no_UTR3_Original = Total_peaks - Original_UTR3_ocurrence
+    no_TTS_Original = Total_peaks - Original_TTS_ocurrence
+    no_intergenic_Original = Total_peaks - Quantity_intergenic
+
+    TSS_value = np.array([[average_shuffle_TSS,no_TSS_shuffle], [Original_TSS_ocurrence, no_TSS_Original]])
+    UTR5_value = np.array([[average_shuffle_UTR5, no_UTR5_shuffle], [Original_UTR5_ocurrence, no_UTR5_Original]])
+    Exon_value = np.array([[average_shuffle_Exon, no_Exon_shuffle], [Original_Exon_ocurrence, no_Exon_Original]])
+    Intron_value = np.array([[average_shuffle_Intron, no_Intron_shuffle], [Original_Intron_ocurrence, no_Intron_Original]])
+    UTR3_value = np.array([[average_shuffle_UTR3, no_UTR3_shuffle], [Original_UTR3_ocurrence, no_UTR3_Original]])
+    TTS_value = np.array([[average_shuffle_TTS, no_TTS_shuffle], [Original_TTS_ocurrence, no_TTS_Original]])
+    intergenic_value = np.array([[average_shuffle_intergenic, no_intergenic_shuffle], [Quantity_intergenic, no_intergenic_Original]])
+
+    TSS_pvalue = round(stats.chi2_contingency(TSS_value)[1],4)
+    UTR5_pvalue = round(stats.chi2_contingency(UTR5_value)[1],4)
+    Exon_pvalue = round(stats.chi2_contingency(Exon_value)[1],4)
+    Intron_pvalue = round(stats.chi2_contingency(Intron_value)[1],4)
+    UTR3_pvalue = round(stats.chi2_contingency(UTR3_value)[1],4)
+    TTS_pvalue = round(stats.chi2_contingency(TTS_value)[1],4)
+    intergenic_pvalue = round(stats.chi2_contingency(intergenic_value)[1],4)
+
+    std_enrichment_TSS = np.std(enrichment_TSS_ocurrence)
+    std_enrichment_UTR5 = np.std(enrichment_UTR5_ocurrence)
+    std_enrichment_Exon = np.std(enrichment_Exon_ocurrence)
+    std_enrichment_Intron = np.std(enrichment_Intron_ocurrence)
+    std_enrichment_UTR3 = np.std(enrichment_UTR3_ocurrence)
+    std_enrichment_TTS = np.std(enrichment_TTS_ocurrence)
+    std_enrichment_intergenic = np.std(enrichment_intergenic_ocurrence)
+
+    std_dev = [std_enrichment_intergenic,std_enrichment_TSS,std_enrichment_UTR5,std_enrichment_Exon,std_enrichment_Intron,std_enrichment_UTR3,std_enrichment_TTS]
 
     x = np.arange(7)
-    all_array = enrichment_intergenic_ocurrence, enrichment_TSS_ocurrence, enrichment_UTR5_ocurrence, enrichment_Exon_ocurrence, enrichment_Intron_ocurrence, enrichment_UTR3_ocurrence, enrichment_TTS_ocurrence
+    all_array = average_enrichment_intergenic, average_enrichment_TSS, average_enrichment_UTR5, average_enrichment_Exon, average_enrichment_Intron, average_enrichment_UTR3, average_enrichment_TTS
     labels = "Intergenic", "Upstream", "5`UTR", "Exon", "Intron","3`UTR", "Downstream"
     fig1, ax1 = pyplot.subplots()
     fig1.set_size_inches(8, 7)
     fig1.suptitle('Enrichment over expected of peaks over gene features')
-    bar_list= pyplot.bar(x,all_array)
+    bar_list= pyplot.bar(x,all_array, yerr=std_dev, align='center', alpha = 0.5, capsize=10)
     bar_list[0].set_facecolor('b')
     bar_list[1].set_facecolor('g')
     bar_list[2].set_facecolor('r')
@@ -677,8 +785,15 @@ def Dropa_Enrichment(intergenic_file,All_Anotation_table, number_shuffles, name_
     bar_list[4].set_facecolor('m')
     bar_list[5].set_facecolor('y')
     bar_list[6].set_facecolor('b')
-    pyplot.legend(bar_list, [labels[0]+"="+str(enrichment_intergenic_ocurrence),labels[1]+"="+ str(enrichment_TSS_ocurrence),labels[2]+"="+ str(enrichment_UTR5_ocurrence),labels[3]+"="+ str(enrichment_Exon_ocurrence),labels[4]+"="+ str(enrichment_Intron_ocurrence),labels[5]+"="+ str(enrichment_UTR3_ocurrence) , labels[6]+"="+ str(enrichment_TTS_ocurrence)] , loc="upper right",bbox_to_anchor=(1.1, 1.11))
+    pyplot.legend(bar_list, [labels[0]+"="+str(average_enrichment_intergenic),labels[1]+"="+ str(average_enrichment_TSS),labels[2]+"="+ str(average_enrichment_UTR5),labels[3]+"="+ str(average_enrichment_Exon),labels[4]+"="+ str(average_enrichment_Intron),labels[5]+"="+ str(average_enrichment_UTR3) , labels[6]+"="+ str(average_enrichment_TTS)] , loc="upper right",bbox_to_anchor=(1.1, 1.11))
     pyplot.xticks(x, labels)
+    pyplot.text(x=0-0.4, y=average_enrichment_intergenic + std_enrichment_intergenic + 0.1, s='p_val=' + str(intergenic_pvalue), size=8)
+    pyplot.text(x=0.6, y=average_enrichment_TSS +std_enrichment_TSS+ 0.1, s='p_val=' + str(TSS_pvalue), size=8)
+    pyplot.text(x=1.6, y=average_enrichment_UTR5 +std_enrichment_UTR5+ 0.1, s='p_val=' + str(UTR5_pvalue), size=8)
+    pyplot.text(x=2.6, y=average_enrichment_Exon +std_enrichment_Exon+ 0.1, s='p_val=' + str(Exon_pvalue), size=8)
+    pyplot.text(x=3.6, y=average_enrichment_Intron +std_enrichment_Intron+ 0.1, s='p_val=' + str(Intron_pvalue), size=8)
+    pyplot.text(x=4.6, y=average_enrichment_UTR3 +std_enrichment_UTR3+ 0.1, s='p_val=' + str(UTR3_pvalue), size=8)
+    pyplot.text(x=5.6, y=average_enrichment_TTS +std_enrichment_TTS+ 0.1, s='p_val=' + str(TTS_pvalue), size=8)
     pyplot.ylabel("Enrichment over expected (Fold Change)")
     pyplot.savefig(folder+"/"+name_output+"_Enrichment.pdf")
 
