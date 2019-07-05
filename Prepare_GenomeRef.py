@@ -36,7 +36,7 @@ result_name,line0,line1,line2,line4, line5 = [],[],[],[],[],[]
 data = open(folder+"/5UTR.bed", "r")
 for line in data.readlines():
     complete_name = (line.split('\t')[3])
-    partial_name = complete_name.split('_utr3')[0]
+    partial_name = complete_name.split('_utr5')[0]
     result_name.append(partial_name)
     line0.append(line.split('\t')[0])
     line1.append(line.split('\t')[1])
