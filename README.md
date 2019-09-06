@@ -63,3 +63,7 @@ To test the program (from installation folder):
 	
 
 Check the DROPA wiki for further informations. 
+
+# Cite
+
+Russo M, De Lucca B, Flati T, Gioiosa S, Chillemi G, Capranico G. DROPA: DRIP-seq optimized peak annotator. BMC Bioinformatics. 2019;20(1):414. doi:10.1186/s12859-019-3009-9
