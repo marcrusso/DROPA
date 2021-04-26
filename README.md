@@ -7,7 +7,7 @@ DROPA is a fully customizable peak-annotation tool optimized for DRIP-seq peaks,
 
 DROPA core is written in Python 3.5 You can install Python directly from the Console with the command:
 
-	sudo apt-get install python3.7
+	sudo apt-get install python3.6
 	sudo apt-get install python-dev
 
 Install Pip to get the packages that DROPA needs for running.
