@@ -27,7 +27,7 @@ Here is the list of required packages:
 To install them:
 
 	pip3 install numpy pandas tqdm intervaltree matplotlib argparse
-	pip3 install upsetplot
+	pip3 install upsetplot scipy
 
 2) Bedtools
 
