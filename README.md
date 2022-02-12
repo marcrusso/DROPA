@@ -3,9 +3,12 @@
 DROPA is a fully customizable peak-annotation tool optimized for DRIP-seq peaks, which allows a finest gene annotation based on gene expression information. Its output can easily be integrated into pipelines to perform downstream analyses, while useful and informative summary plots and statistical enrichment tests can be produced. Although it is developed for R-loop mapping, DROPA can also be used to annotate other genomic sequencing data as in the case of Histone marks IP-seq, DNAse-seq, FAIRE-seq.
 
 # Installation
+*****CONDA ENVIRONMENT FILE: DROPA.yml***** 
+Use the conda yml file and clone this repository without any further installation!
+If you want to install all the librarries, follow these instructions:
 1) Python:
 
-DROPA core is written in Python 3.5 You can install Python directly from the Console with the command:
+DROPA core is written in Python 3.6 You can install Python directly from the Console with the command:
 
 	sudo apt-get install python3.6
 	sudo apt-get install python-dev
