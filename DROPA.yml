@@ -1,8 +1,6 @@
 name: DROPA
 channels:
-  - r
   - bioconda
-  - https://conda.anaconda.org/dranew
   - conda-forge
   - defaults
 dependencies:
